@@ -1,211 +1,354 @@
 import { useState } from 'react';
-import { Search, Plus, Edit, Trash2 } from 'lucide-react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Avatar, AvatarFallback } from '../ui/avatar';
-import { Badge } from '../ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../ui/dialog';
-import { Label } from '../ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Search, Plus, Edit2, Trash2, X } from 'lucide-react';
+
+interface Employee {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  position: string;
+  department: string;
+  phone: string;
+  status: 'active' | 'inactive';
+}
 
 export function Employees() {
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDepartment, setSelectedDepartment] = useState('all');
+  const [employees, setEmployees] = useState<Employee[]>([
+    {
+      id: 1,
+      firstName: 'Ahmet',
+      lastName: 'Yılmaz',
+      email: 'ahmet.yilmaz@company.com',
+      position: 'CEO',
+      department: 'Executive',
+      phone: '+90 555 123 4567',
+      status: 'active',
+    },
+    {
+      id: 2,
+      firstName: 'Ayşe',
+      lastName: 'Demir',
+      email: 'ayse.demir@company.com',
+      position: 'CTO',
+      department: 'Technology',
+      phone: '+90 555 234 5678',
+      status: 'active',
+    },
+    {
+      id: 3,
+      firstName: 'Mehmet',
+      lastName: 'Kaya',
+      email: 'mehmet.kaya@company.com',
+      position: 'Sales Manager',
+      department: 'Sales',
+      phone: '+90 555 345 6789',
+      status: 'active',
+    },
+    {
+      id: 4,
+      firstName: 'Zeynep',
+      lastName: 'Aydın',
+      email: 'zeynep.aydin@company.com',
+      position: 'Marketing Lead',
+      department: 'Marketing',
+      phone: '+90 555 456 7890',
+      status: 'active',
+    },
+    {
+      id: 5,
+      firstName: 'Can',
+      lastName: 'Öztürk',
+      email: 'can.ozturk@company.com',
+      position: 'Designer',
+      department: 'Design',
+      phone: '+90 555 567 8901',
+      status: 'active',
+    },
+  ]);
 
-  const employees = [
-    { id: 1, name: 'Sarah Johnson', email: 'sarah.j@company.com', position: 'Marketing Manager', department: 'Marketing', status: 'active' },
-    { id: 2, name: 'Michael Chen', email: 'michael.c@company.com', position: 'Senior Developer', department: 'Engineering', status: 'active' },
-    { id: 3, name: 'Emma Williams', email: 'emma.w@company.com', position: 'Sales Director', department: 'Sales', status: 'active' },
-    { id: 4, name: 'James Brown', email: 'james.b@company.com', position: 'HR Specialist', department: 'HR', status: 'active' },
-    { id: 5, name: 'Lisa Anderson', email: 'lisa.a@company.com', position: 'Financial Analyst', department: 'Finance', status: 'active' },
-    { id: 6, name: 'David Martinez', email: 'david.m@company.com', position: 'Product Designer', department: 'Design', status: 'inactive' },
-    { id: 7, name: 'Sophie Taylor', email: 'sophie.t@company.com', position: 'Content Writer', department: 'Marketing', status: 'active' },
-    { id: 8, name: 'Ryan Wilson', email: 'ryan.w@company.com', position: 'DevOps Engineer', department: 'Engineering', status: 'active' },
-    { id: 9, name: 'Olivia Davis', email: 'olivia.d@company.com', position: 'Account Manager', department: 'Sales', status: 'active' },
-    { id: 10, name: 'Alex Thompson', email: 'alex.t@company.com', position: 'QA Engineer', department: 'Engineering', status: 'active' },
-  ];
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    position: '',
+    department: '',
+    phone: '',
+  });
 
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('');
+  const filteredEmployees = employees.filter((emp) =>
+    `${emp.firstName} ${emp.lastName} ${emp.email} ${emp.position}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
+
+  const handleAdd = () => {
+    setEditingEmployee(null);
+    setFormData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      position: '',
+      department: '',
+      phone: '',
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (employee: Employee) => {
+    setEditingEmployee(employee);
+    setFormData({
+      firstName: employee.firstName,
+      lastName: employee.lastName,
+      email: employee.email,
+      position: employee.position,
+      department: employee.department,
+      phone: employee.phone,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = (id: number) => {
+    if (confirm('Are you sure you want to delete this employee?')) {
+      setEmployees(employees.filter((emp) => emp.id !== id));
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (editingEmployee) {
+      setEmployees(
+        employees.map((emp) =>
+          emp.id === editingEmployee.id
+            ? { ...emp, ...formData }
+            : emp
+        )
+      );
+    } else {
+      const newEmployee: Employee = {
+        id: Math.max(...employees.map((e) => e.id)) + 1,
+        ...formData,
+        status: 'active',
+      };
+      setEmployees([...employees, newEmployee]);
+    }
+
+    setIsModalOpen(false);
   };
 
   return (
-    <div className="p-8">
-      {/* Header */}
+    <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-gray-900 mb-2">Employees</h1>
-          <p className="text-gray-600">Manage your team's email signatures</p>
+          <h1 className="text-[#1F2937] text-3xl font-bold mb-2">Employees</h1>
+          <p className="text-[#6B7280]">Manage your team members and their email signatures</p>
         </div>
-        <Button 
-          onClick={() => setIsAddModalOpen(true)}
-          className="bg-[#2563EB] hover:bg-[#1d4ed8]"
+        <button
+          onClick={handleAdd}
+          className="px-6 py-2.5 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all shadow-sm flex items-center gap-2"
         >
-          <Plus className="w-4 h-4 mr-2" />
-          Add New Employee
-        </Button>
+          <Plus size={20} />
+          Add Employee
+        </button>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-        <div className="flex gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <Input
-              placeholder="Search employees..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 border-gray-300"
-            />
-          </div>
-          <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-            <SelectTrigger className="w-[200px] border-gray-300">
-              <SelectValue placeholder="Department" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Departments</SelectItem>
-              <SelectItem value="marketing">Marketing</SelectItem>
-              <SelectItem value="engineering">Engineering</SelectItem>
-              <SelectItem value="sales">Sales</SelectItem>
-              <SelectItem value="hr">HR</SelectItem>
-              <SelectItem value="finance">Finance</SelectItem>
-              <SelectItem value="design">Design</SelectItem>
-            </SelectContent>
-          </Select>
+      <div className="mb-6">
+        <div className="relative w-[400px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" size={20} />
+          <input
+            type="text"
+            placeholder="Search employees..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full h-10 pl-10 pr-3 border border-[#E5E7EB] rounded-lg focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all"
+          />
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left py-3 px-6 text-gray-600 text-sm">Employee</th>
-                <th className="text-left py-3 px-6 text-gray-600 text-sm">Email</th>
-                <th className="text-left py-3 px-6 text-gray-600 text-sm">Position</th>
-                <th className="text-left py-3 px-6 text-gray-600 text-sm">Department</th>
-                <th className="text-left py-3 px-6 text-gray-600 text-sm">Status</th>
-                <th className="text-left py-3 px-6 text-gray-600 text-sm">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {employees.map((employee) => (
-                <tr
-                  key={employee.id}
-                  className="border-b border-gray-100 hover:bg-blue-50 transition-colors"
-                >
-                  <td className="py-4 px-6">
-                    <div className="flex items-center">
-                      <Avatar className="w-8 h-8 mr-3">
-                        <AvatarFallback className="bg-[#2563EB] text-white text-xs">
-                          {getInitials(employee.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-gray-900">{employee.name}</span>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-gray-50 border-b border-gray-200">
+              <th className="px-6 h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
+                Employee
+              </th>
+              <th className="px-6 h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
+                Email
+              </th>
+              <th className="px-6 h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
+                Position
+              </th>
+              <th className="px-6 h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
+                Department
+              </th>
+              <th className="px-6 h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredEmployees.map((employee) => (
+              <tr key={employee.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <td className="px-6 h-16">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-[#E0E7FF] flex items-center justify-center text-[#2563EB] font-semibold">
+                      {employee.firstName[0]}{employee.lastName[0]}
                     </div>
-                  </td>
-                  <td className="py-4 px-6 text-gray-600">{employee.email}</td>
-                  <td className="py-4 px-6 text-gray-600">{employee.position}</td>
-                  <td className="py-4 px-6 text-gray-600">{employee.department}</td>
-                  <td className="py-4 px-6">
-                    <Badge
-                      variant={employee.status === 'active' ? 'default' : 'secondary'}
-                      className={employee.status === 'active' 
-                        ? 'bg-[#10B981] hover:bg-[#10B981]' 
-                        : 'bg-gray-400 hover:bg-gray-400'}
+                    <span className="text-sm font-medium text-[#1F2937]">
+                      {employee.firstName} {employee.lastName}
+                    </span>
+                  </div>
+                </td>
+                <td className="px-6 h-16 text-sm text-[#6B7280]">{employee.email}</td>
+                <td className="px-6 h-16 text-sm text-[#6B7280]">{employee.position}</td>
+                <td className="px-6 h-16 text-sm text-[#6B7280]">{employee.department}</td>
+                <td className="px-6 h-16">
+                  <span className="bg-[#ECFDF5] text-[#10B981] px-3 py-1 rounded-full text-xs font-semibold">
+                    Active
+                  </span>
+                </td>
+                <td className="px-6 h-16">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleEdit(employee)}
+                      className="p-2 text-[#2563EB] hover:bg-blue-50 rounded-lg transition-colors"
                     >
-                      {employee.status}
-                    </Badge>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex gap-2">
-                      <button className="p-1.5 hover:bg-gray-100 rounded transition-colors">
-                        <Edit className="w-4 h-4 text-gray-600" />
-                      </button>
-                      <button className="p-1.5 hover:bg-red-50 rounded transition-colors">
-                        <Trash2 className="w-4 h-4 text-red-600" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
-          <p className="text-sm text-gray-600">Showing 1 to 10 of 247 employees</p>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled className="border-gray-300">Previous</Button>
-            <Button variant="outline" size="sm" className="border-gray-300 bg-[#2563EB] text-white">1</Button>
-            <Button variant="outline" size="sm" className="border-gray-300">2</Button>
-            <Button variant="outline" size="sm" className="border-gray-300">3</Button>
-            <Button variant="outline" size="sm" className="border-gray-300">Next</Button>
-          </div>
-        </div>
+                      <Edit2 size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(employee.id)}
+                      className="p-2 text-[#EF4444] hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      {/* Add Employee Modal */}
-      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Add New Employee</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input id="firstName" placeholder="John" className="border-gray-300" />
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-2xl shadow-2xl relative">
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-4 right-4 text-[#6B7280] hover:text-[#1F2937]"
+            >
+              <X size={24} />
+            </button>
+
+            <h2 className="text-2xl font-bold text-[#1F2937] mb-6">
+              {editingEmployee ? 'Edit Employee' : 'Add New Employee'}
+            </h2>
+
+            <form onSubmit={handleSubmit}>
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="block text-sm font-medium text-[#1F2937] mb-2">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.firstName}
+                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    className="h-10 px-3 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#1F2937] mb-2">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.lastName}
+                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    className="h-10 px-3 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all"
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input id="lastName" placeholder="Doe" className="border-gray-300" />
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-[#1F2937] mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="h-10 px-3 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all"
+                />
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Input id="email" type="email" placeholder="john.doe@company.com" className="border-gray-300" />
+
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#1F2937] mb-2">
+                    Position
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.position}
+                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                    className="h-10 px-3 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#1F2937] mb-2">
+                    Department
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.department}
+                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                    className="h-10 px-3 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all"
+                  />
+                </div>
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="position">Position</Label>
-              <Input id="position" placeholder="Marketing Manager" className="border-gray-300" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="department">Department</Label>
-              <Select>
-                <SelectTrigger className="border-gray-300">
-                  <SelectValue placeholder="Select department" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="marketing">Marketing</SelectItem>
-                  <SelectItem value="engineering">Engineering</SelectItem>
-                  <SelectItem value="sales">Sales</SelectItem>
-                  <SelectItem value="hr">HR</SelectItem>
-                  <SelectItem value="finance">Finance</SelectItem>
-                  <SelectItem value="design">Design</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone</Label>
-              <Input id="phone" placeholder="+90 555 123 4567" className="border-gray-300" />
-            </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-[#1F2937] mb-2">
+                  Phone
+                </label>
+                <input
+                  type="tel"
+                  required
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="h-10 px-3 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all"
+                />
+              </div>
+
+              <div className="flex gap-3 justify-end">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-6 py-2.5 bg-white border border-[#E5E7EB] text-[#1F2937] rounded-lg font-semibold hover:bg-gray-50 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all shadow-sm"
+                >
+                  {editingEmployee ? 'Save Changes' : 'Add Employee'}
+                </button>
+              </div>
+            </form>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddModalOpen(false)} className="border-gray-300">
-              Cancel
-            </Button>
-            <Button onClick={() => setIsAddModalOpen(false)} className="bg-[#2563EB] hover:bg-[#1d4ed8]">
-              Save Employee
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
     </div>
   );
 }

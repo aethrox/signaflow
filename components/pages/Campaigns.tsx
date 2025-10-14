@@ -1,242 +1,176 @@
 import { useState } from 'react';
-import { Plus, Edit, Trash2, Link as LinkIcon } from 'lucide-react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Textarea } from '../ui/textarea';
-import { Switch } from '../ui/switch';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../ui/dialog';
 
 export function Campaigns() {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isActive, setIsActive] = useState(true);
-  const [bannerTitle, setBannerTitle] = useState('Holiday Sale');
-  const [bannerMessage, setBannerMessage] = useState('Get 20% off on all products this season!');
-  const [bannerLink, setBannerLink] = useState('https://company.com/sale');
-  const [bannerColor, setBannerColor] = useState('#2563EB');
+  const [formData, setFormData] = useState({
+    title: 'Summer Sale',
+    message: 'Get 25% off all products this summer! Limited time offer.',
+    linkUrl: 'https://company.com/summer-sale',
+  });
 
-  const activeBanner = {
-    title: 'Holiday Sale',
-    message: 'Get 20% off on all products this season!',
-    link: 'https://company.com/sale',
-    color: '#2563EB',
-    createdDate: '2025-10-01',
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
   };
 
   return (
-    <div className="p-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+    <div>
+      <div className="mb-8">
+        <h1 className="text-[#1F2937] text-3xl font-bold mb-2">Banner Campaigns</h1>
+        <p className="text-[#6B7280]">Create promotional banners for your email signatures</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-6">
         <div>
-          <h1 className="text-gray-900 mb-2">Campaign Banners</h1>
-          <p className="text-gray-600">Manage promotional banners in email signatures</p>
-        </div>
-        <Button 
-          onClick={() => setIsCreateModalOpen(true)}
-          className="bg-[#2563EB] hover:bg-[#1d4ed8]"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Create New Banner
-        </Button>
-      </div>
-
-      {/* Active Banner Section */}
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-gray-900">Active Banner</h3>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Active</span>
-            <Switch checked={isActive} onCheckedChange={setIsActive} />
-          </div>
-        </div>
-
-        {/* Banner Preview */}
-        <div className="bg-gray-50 rounded-lg p-6 mb-4 border border-gray-200">
-          <div className="mb-4">
-            <h4 className="text-gray-700 text-sm mb-2">Banner Preview</h4>
-            <div 
-              className="rounded-lg p-4 text-white"
-              style={{ backgroundColor: activeBanner.color }}
-            >
-              <div className="text-sm">{activeBanner.title}</div>
-              <div className="text-xs mt-1 opacity-90">{activeBanner.message}</div>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-200 pt-4">
-            <h4 className="text-gray-700 text-sm mb-3">Full Signature Preview</h4>
-            <div className="bg-white p-4 border border-gray-200 rounded text-sm">
-              <div className="text-gray-900">John Doe</div>
-              <div className="text-gray-600">Marketing Manager</div>
-              <div className="text-gray-600 mt-2">
-                <div>john.doe@company.com</div>
-                <div>+1 (555) 123-4567</div>
-              </div>
-              
-              {/* Banner in signature */}
-              <div 
-                className="mt-4 rounded p-3 text-white cursor-pointer hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: activeBanner.color }}
-              >
-                <div className="text-xs">{activeBanner.title}</div>
-                <div className="text-xs mt-0.5 opacity-90">{activeBanner.message}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Banner Details */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <p className="text-sm text-gray-600">Title</p>
-            <p className="text-gray-900">{activeBanner.title}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-600">Created Date</p>
-            <p className="text-gray-900">{activeBanner.createdDate}</p>
-          </div>
-          <div className="col-span-2">
-            <p className="text-sm text-gray-600">Message</p>
-            <p className="text-gray-900">{activeBanner.message}</p>
-          </div>
-          <div className="col-span-2">
-            <p className="text-sm text-gray-600">Link</p>
-            <a href={activeBanner.link} className="text-[#2563EB] hover:underline">
-              {activeBanner.link}
-            </a>
-          </div>
-        </div>
-
-        <div className="flex gap-2">
-          <Button variant="outline" className="border-gray-300">
-            <Edit className="w-4 h-4 mr-2" />
-            Edit Banner
-          </Button>
-          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
-            <Trash2 className="w-4 h-4 mr-2" />
-            Delete Banner
-          </Button>
-        </div>
-      </div>
-
-      {/* Create/Edit Banner Modal */}
-      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="sm:max-w-[900px]">
-          <DialogHeader>
-            <DialogTitle>Create Campaign Banner</DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-2 gap-6 py-4">
-            {/* Form */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="bannerTitle">Banner Title</Label>
-                <Input
-                  id="bannerTitle"
-                  value={bannerTitle}
-                  onChange={(e) => setBannerTitle(e.target.value)}
-                  placeholder="Enter banner title"
-                  className="border-gray-300"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="bannerMessage">Message</Label>
-                <Textarea
-                  id="bannerMessage"
-                  value={bannerMessage}
-                  onChange={(e) => setBannerMessage(e.target.value)}
-                  placeholder="Enter banner message (max 150 characters)"
-                  maxLength={150}
-                  rows={3}
-                  className="border-gray-300 resize-none"
-                />
-                <p className="text-xs text-gray-500">{bannerMessage.length}/150 characters</p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="bannerLink">Link URL</Label>
-                <div className="relative">
-                  <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input
-                    id="bannerLink"
-                    value={bannerLink}
-                    onChange={(e) => setBannerLink(e.target.value)}
-                    placeholder="https://example.com"
-                    className="pl-10 border-gray-300"
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-[#1F2937]">Current Campaign</h2>
+              <div className="flex items-center gap-3">
+                <span className={`text-sm font-medium ${isActive ? 'text-[#10B981]' : 'text-[#6B7280]'}`}>
+                  {isActive ? 'Active' : 'Inactive'}
+                </span>
+                <button
+                  onClick={() => setIsActive(!isActive)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    isActive ? 'bg-[#10B981]' : 'bg-gray-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      isActive ? 'translate-x-6' : 'translate-x-1'
+                    }`}
                   />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="bannerColor">Banner Color</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="bannerColor"
-                    type="color"
-                    value={bannerColor}
-                    onChange={(e) => setBannerColor(e.target.value)}
-                    className="w-20 h-10 border-gray-300 cursor-pointer"
-                  />
-                  <Input
-                    value={bannerColor}
-                    onChange={(e) => setBannerColor(e.target.value)}
-                    placeholder="#2563EB"
-                    className="flex-1 border-gray-300"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-2">
-                <Label htmlFor="activeBanner">Active</Label>
-                <Switch id="activeBanner" />
+                </button>
               </div>
             </div>
 
-            {/* Live Preview */}
-            <div className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <h4 className="text-sm text-gray-700 mb-3">Live Preview</h4>
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <p className="text-xs text-gray-600 mb-2">Banner appearance:</p>
-                  <div 
-                    className="rounded-lg p-4 text-white mb-4"
-                    style={{ backgroundColor: bannerColor }}
-                  >
-                    <div className="text-sm">{bannerTitle || 'Banner Title'}</div>
-                    <div className="text-xs mt-1 opacity-90">{bannerMessage || 'Banner message will appear here'}</div>
-                  </div>
+                <label className="block text-sm font-medium text-[#1F2937] mb-2">
+                  Campaign Title
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  className="h-10 px-3 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all"
+                  placeholder="e.g., Summer Sale"
+                />
+              </div>
 
-                  <p className="text-xs text-gray-600 mb-2">In email signature:</p>
-                  <div className="bg-white p-4 border border-gray-200 rounded text-sm">
-                    <div className="text-gray-900">John Doe</div>
-                    <div className="text-gray-600">Marketing Manager</div>
-                    <div className="text-gray-600 mt-2 text-xs">
-                      <div>john.doe@company.com</div>
-                      <div>+1 (555) 123-4567</div>
-                    </div>
-                    
-                    <div 
-                      className="mt-3 rounded p-3 text-white cursor-pointer hover:opacity-90 transition-opacity"
-                      style={{ backgroundColor: bannerColor }}
-                    >
-                      <div className="text-xs">{bannerTitle || 'Banner Title'}</div>
-                      <div className="text-xs mt-0.5 opacity-90">{bannerMessage || 'Message'}</div>
-                    </div>
-                  </div>
+              <div>
+                <label className="block text-sm font-medium text-[#1F2937] mb-2">
+                  Message (max 150 characters)
+                </label>
+                <textarea
+                  required
+                  maxLength={150}
+                  value={formData.message}
+                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                  className="px-3 py-2 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all resize-none"
+                  rows={3}
+                  placeholder="Enter your campaign message..."
+                />
+                <div className="text-xs text-[#6B7280] mt-1 text-right">
+                  {formData.message.length}/150
                 </div>
               </div>
-            </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#1F2937] mb-2">
+                  Link URL
+                </label>
+                <input
+                  type="url"
+                  required
+                  value={formData.linkUrl}
+                  onChange={(e) => setFormData({ ...formData, linkUrl: e.target.value })}
+                  className="h-10 px-3 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all"
+                  placeholder="https://example.com"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full px-6 py-2.5 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all shadow-sm"
+              >
+                Update Campaign
+              </button>
+            </form>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCreateModalOpen(false)} className="border-gray-300">
-              Cancel
-            </Button>
-            <Button onClick={() => setIsCreateModalOpen(false)} className="bg-[#2563EB] hover:bg-[#1d4ed8]">
-              Create Banner
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h3 className="text-sm font-semibold text-[#1F2937] mb-2">Tips for Effective Campaigns</h3>
+            <ul className="text-sm text-[#6B7280] space-y-1">
+              <li>• Keep messages short and compelling</li>
+              <li>• Use clear call-to-action phrases</li>
+              <li>• Test links before activating</li>
+              <li>• Update campaigns regularly for freshness</li>
+            </ul>
+          </div>
+        </div>
+
+        <div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 className="text-lg font-bold text-[#1F2937] mb-4">Live Preview</h2>
+            <p className="text-sm text-[#6B7280] mb-6">
+              This is how the banner will appear in email signatures
+            </p>
+
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50">
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <div className="border-b border-gray-200 pb-4 mb-4">
+                  <div className="text-gray-900 font-semibold">John Doe</div>
+                  <div className="text-gray-600 text-sm">Marketing Manager</div>
+                  <div className="text-gray-600 text-sm mt-2">
+                    <div>john.doe@company.com</div>
+                    <div>+1 (555) 123-4567</div>
+                  </div>
+                </div>
+
+                {isActive && (
+                  <a
+                    href={formData.linkUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block bg-gradient-to-r from-[#2563EB] to-[#1d4ed8] text-white rounded-lg p-4 hover:from-[#1d4ed8] hover:to-[#1e40af] transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="font-bold text-lg mb-1">{formData.title}</div>
+                        <div className="text-sm opacity-90">{formData.message}</div>
+                      </div>
+                      <div className="ml-4">
+                        <svg
+                          className="w-6 h-6"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {!isActive && (
+              <div className="mt-4 text-center">
+                <p className="text-sm text-[#6B7280]">
+                  Campaign is currently inactive. Toggle the switch above to activate it.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

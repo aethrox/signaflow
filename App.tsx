@@ -33,8 +33,8 @@ export default function App() {
       case 'settings':
         return (
           <div className="p-8">
-            <h1 className="text-gray-900 mb-2">Settings</h1>
-            <p className="text-gray-600">Settings page coming soon...</p>
+            <h1 className="text-[#1F2937] text-3xl font-bold mb-2">Settings</h1>
+            <p className="text-[#6B7280]">Settings page coming soon...</p>
           </div>
         );
       default:
@@ -43,20 +43,13 @@ export default function App() {
   };
 
   return (
-    <div className="h-screen flex bg-[#F8FAFC]">
-      {/* Sidebar */}
+    <div className="min-h-screen bg-[#F8FAFC]">
       <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
+      <TopNavbar breadcrumbs={getBreadcrumbs()} />
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Navbar */}
-        <TopNavbar breadcrumbs={getBreadcrumbs()} />
-
-        {/* Page Content */}
-        <main className="flex-1 overflow-y-auto">
-          {renderPage()}
-        </main>
-      </div>
+      <main className="ml-[240px] mt-16 p-8">
+        {renderPage()}
+      </main>
     </div>
   );
 }

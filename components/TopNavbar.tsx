@@ -1,11 +1,4 @@
 import { Bell, ChevronDown } from 'lucide-react';
-import { Avatar, AvatarFallback } from './ui/avatar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu';
 
 interface TopNavbarProps {
   breadcrumbs: string[];
@@ -13,48 +6,40 @@ interface TopNavbarProps {
 
 export function TopNavbar({ breadcrumbs }: TopNavbarProps) {
   return (
-    <div className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 shadow-sm">
-      {/* Breadcrumb */}
-      <div className="flex items-center text-sm">
+    <div className="fixed top-0 left-[240px] right-0 h-16 bg-white border-b border-[#E5E7EB] flex items-center px-8 z-20">
+      <div className="flex items-center gap-2 text-sm">
         {breadcrumbs.map((crumb, index) => (
-          <span key={index} className="flex items-center">
-            <span className={index === breadcrumbs.length - 1 ? 'text-gray-900' : 'text-gray-500'}>
+          <div key={index} className="flex items-center gap-2">
+            {index > 0 && <span className="text-[#6B7280]">/</span>}
+            <span
+              className={
+                index === breadcrumbs.length - 1
+                  ? 'text-[#1F2937] font-medium'
+                  : 'text-[#6B7280]'
+              }
+            >
               {crumb}
             </span>
-            {index < breadcrumbs.length - 1 && (
-              <span className="mx-2 text-gray-400">{'>'}</span>
-            )}
-          </span>
+          </div>
         ))}
       </div>
 
-      {/* Right Section */}
-      <div className="flex items-center gap-4">
-        {/* Notification */}
-        <button className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
-          <Bell className="w-5 h-5 text-gray-600" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+      <div className="ml-auto flex items-center gap-4">
+        <button className="relative p-2 text-[#6B7280] hover:text-[#1F2937] transition-colors">
+          <Bell size={24} />
+          <span className="absolute top-1 right-1 w-2 h-2 bg-[#EF4444] rounded-full"></span>
         </button>
 
-        {/* User Menu */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 hover:bg-gray-100 rounded-lg px-2 py-1.5 transition-colors">
-              <Avatar className="w-8 h-8">
-                <AvatarFallback className="bg-[#2563EB] text-white">
-                  JD
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-sm">John Doe</span>
-              <ChevronDown className="w-4 h-4 text-gray-500" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuItem className="text-red-600">Logout</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-3 pl-4 border-l border-[#E5E7EB]">
+          <div className="w-10 h-10 rounded-full bg-[#E0E7FF] flex items-center justify-center text-[#2563EB] font-semibold text-sm">
+            JD
+          </div>
+          <div className="text-sm">
+            <div className="font-semibold text-[#1F2937]">John Doe</div>
+            <div className="text-xs text-[#6B7280]">Admin</div>
+          </div>
+          <ChevronDown size={16} className="text-[#6B7280]" />
+        </div>
       </div>
     </div>
   );

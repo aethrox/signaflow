@@ -5,7 +5,7 @@ import { Badge } from '../ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 
 export function Templates() {
-  const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
+  const [, setSelectedTemplate] = useState<number | null>(null);
   const [previewTemplate, setPreviewTemplate] = useState<number | null>(null);
 
   const templates = [

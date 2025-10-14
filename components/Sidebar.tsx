@@ -30,17 +30,17 @@ export function Sidebar({ currentPage, onNavigate, isOpen, onClose }: SidebarPro
         }`}
       >
         <div className="h-16 flex items-center justify-between px-4 border-b border-white/10">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <img
               src="/signaflow_logo.svg"
               alt="SignaFlow"
-              className="h-8 w-8 object-contain"
+              className="h-10 w-10 object-contain"
             />
-            <h1 className="text-white text-xl font-bold">SignaFlow</h1>
+            <h1 className="text-white text-xl font-bold tracking-tight">SignaFlow</h1>
           </div>
           <button
             onClick={onClose}
-            className="lg:hidden text-white p-2 hover:bg-white/10 rounded-lg"
+            className="lg:hidden text-white p-2 hover:bg-white/10 rounded-lg transition-colors"
           >
             <X size={20} />
           </button>

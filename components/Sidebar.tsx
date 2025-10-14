@@ -32,7 +32,7 @@ export function Sidebar({ currentPage, onNavigate, isOpen, onClose }: SidebarPro
         <div className="h-16 flex items-center justify-between px-4 border-b border-white/10">
           <div className="flex items-center gap-2">
             <img
-              src="/signaflow_logo.png"
+              src="/signaflow_logo.svg"
               alt="SignaFlow"
               className="h-8 w-8 object-contain"
             />

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { TopNavbar } from './components/TopNavbar';
+import { MobileNav } from './components/MobileNav';
 import { Dashboard } from './components/pages/Dashboard';
 import { Employees } from './components/pages/Employees';
 import { Templates } from './components/pages/Templates';
@@ -8,6 +9,7 @@ import { Campaigns } from './components/pages/Campaigns';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const getBreadcrumbs = () => {
     const breadcrumbMap: { [key: string]: string[] } = {
@@ -32,8 +34,8 @@ export default function App() {
         return <Campaigns />;
       case 'settings':
         return (
-          <div className="p-8">
-            <h1 className="text-[#1F2937] text-3xl font-bold mb-2">Settings</h1>
+          <div className="p-4 md:p-8">
+            <h1 className="text-[#1F2937] text-2xl md:text-3xl font-bold mb-2">Settings</h1>
             <p className="text-[#6B7280]">Settings page coming soon...</p>
           </div>
         );
@@ -44,12 +46,26 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
-      <TopNavbar breadcrumbs={getBreadcrumbs()} />
+      <Sidebar
+        currentPage={currentPage}
+        onNavigate={(page) => {
+          setCurrentPage(page);
+          setIsSidebarOpen(false);
+        }}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
 
-      <main className="ml-[240px] mt-16 p-8">
+      <TopNavbar
+        breadcrumbs={getBreadcrumbs()}
+        onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
+      />
+
+      <main className="lg:ml-[240px] mt-16 pb-20 md:pb-8 p-4 md:p-8">
         {renderPage()}
       </main>
+
+      <MobileNav currentPage={currentPage} onNavigate={setCurrentPage} />
     </div>
   );
 }

@@ -74,12 +74,12 @@ export function Templates() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-[#1F2937] text-3xl font-bold mb-2">Email Signature Templates</h1>
-        <p className="text-[#6B7280]">Choose a template for your team's email signatures</p>
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-[#1F2937] text-2xl md:text-3xl font-bold mb-2">Email Signature Templates</h1>
+        <p className="text-[#6B7280] text-sm md:text-base">Choose a template for your team's email signatures</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {templates.map((template) => (
           <div
             key={template.id}

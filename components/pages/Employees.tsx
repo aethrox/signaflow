@@ -141,22 +141,22 @@ export function Employees() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
         <div>
-          <h1 className="text-[#1F2937] text-3xl font-bold mb-2">Employees</h1>
-          <p className="text-[#6B7280]">Manage your team members and their email signatures</p>
+          <h1 className="text-[#1F2937] text-2xl md:text-3xl font-bold mb-2">Employees</h1>
+          <p className="text-[#6B7280] text-sm md:text-base">Manage your team members and their email signatures</p>
         </div>
         <button
           onClick={handleAdd}
-          className="px-6 py-2.5 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all shadow-sm flex items-center gap-2"
+          className="px-4 md:px-6 py-2.5 md:py-3 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all shadow-sm flex items-center justify-center gap-2 min-h-[44px]"
         >
           <Plus size={20} />
-          Add Employee
+          <span>Add Employee</span>
         </button>
       </div>
 
-      <div className="mb-6">
-        <div className="relative w-[400px]">
+      <div className="mb-4 md:mb-6">
+        <div className="relative w-full md:w-[400px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" size={20} />
           <input
             type="text"
@@ -169,70 +169,75 @@ export function Employees() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-gray-50 border-b border-gray-200">
-              <th className="px-6 h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                Employee
-              </th>
-              <th className="px-6 h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                Email
-              </th>
-              <th className="px-6 h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                Position
-              </th>
-              <th className="px-6 h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                Department
-              </th>
-              <th className="px-6 h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredEmployees.map((employee) => (
-              <tr key={employee.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                <td className="px-6 h-16">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-[#E0E7FF] flex items-center justify-center text-[#2563EB] font-semibold">
-                      {employee.firstName[0]}{employee.lastName[0]}
-                    </div>
-                    <span className="text-sm font-medium text-[#1F2937]">
-                      {employee.firstName} {employee.lastName}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-6 h-16 text-sm text-[#6B7280]">{employee.email}</td>
-                <td className="px-6 h-16 text-sm text-[#6B7280]">{employee.position}</td>
-                <td className="px-6 h-16 text-sm text-[#6B7280]">{employee.department}</td>
-                <td className="px-6 h-16">
-                  <span className="bg-[#ECFDF5] text-[#10B981] px-3 py-1 rounded-full text-xs font-semibold">
-                    Active
-                  </span>
-                </td>
-                <td className="px-6 h-16">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleEdit(employee)}
-                      className="p-2 text-[#2563EB] hover:bg-blue-50 rounded-lg transition-colors"
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(employee.id)}
-                      className="p-2 text-[#EF4444] hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-200">
+                <th className="px-3 md:px-6 h-10 md:h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
+                  Employee
+                </th>
+                <th className="px-3 md:px-6 h-10 md:h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider hidden md:table-cell">
+                  Email
+                </th>
+                <th className="px-3 md:px-6 h-10 md:h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider hidden sm:table-cell">
+                  Position
+                </th>
+                <th className="px-3 md:px-6 h-10 md:h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider hidden lg:table-cell">
+                  Department
+                </th>
+                <th className="px-3 md:px-6 h-10 md:h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider hidden sm:table-cell">
+                  Status
+                </th>
+                <th className="px-3 md:px-6 h-10 md:h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredEmployees.map((employee) => (
+                <tr key={employee.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                  <td className="px-3 md:px-6 h-14 md:h-16">
+                    <div className="flex items-center gap-2 md:gap-3">
+                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#E0E7FF] flex items-center justify-center text-[#2563EB] font-semibold text-xs md:text-sm flex-shrink-0">
+                        {employee.firstName[0]}{employee.lastName[0]}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs md:text-sm font-medium text-[#1F2937] truncate">
+                          {employee.firstName} {employee.lastName}
+                        </div>
+                        <div className="text-xs text-[#6B7280] md:hidden truncate">{employee.email}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-3 md:px-6 h-14 md:h-16 text-xs md:text-sm text-[#6B7280] hidden md:table-cell">{employee.email}</td>
+                  <td className="px-3 md:px-6 h-14 md:h-16 text-xs md:text-sm text-[#6B7280] hidden sm:table-cell">{employee.position}</td>
+                  <td className="px-3 md:px-6 h-14 md:h-16 text-xs md:text-sm text-[#6B7280] hidden lg:table-cell">{employee.department}</td>
+                  <td className="px-3 md:px-6 h-14 md:h-16 hidden sm:table-cell">
+                    <span className="bg-[#ECFDF5] text-[#10B981] px-3 py-1 rounded-full text-xs font-semibold">
+                      Active
+                    </span>
+                  </td>
+                  <td className="px-3 md:px-6 h-14 md:h-16">
+                    <div className="flex items-center gap-1 md:gap-2">
+                      <button
+                        onClick={() => handleEdit(employee)}
+                        className="p-2 text-[#2563EB] hover:bg-blue-50 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(employee.id)}
+                        className="p-2 text-[#EF4444] hover:bg-red-50 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {isModalOpen && (

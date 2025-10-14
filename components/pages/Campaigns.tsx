@@ -14,12 +14,12 @@ export function Campaigns() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-[#1F2937] text-3xl font-bold mb-2">Banner Campaigns</h1>
-        <p className="text-[#6B7280]">Create promotional banners for your email signatures</p>
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-[#1F2937] text-2xl md:text-3xl font-bold mb-2">Banner Campaigns</h1>
+        <p className="text-[#6B7280] text-sm md:text-base">Create promotional banners for your email signatures</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
             <div className="flex items-center justify-between mb-4">

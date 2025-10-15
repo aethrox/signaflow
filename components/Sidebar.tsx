@@ -1,4 +1,4 @@
-import { Home, Users, Layout, Megaphone, Settings, X } from 'lucide-react';
+import { Home, Users, Layout, Megaphone, Settings, X, Radio } from 'lucide-react';
 
 interface SidebarProps {
   currentPage: string;
@@ -31,11 +31,9 @@ export function Sidebar({ currentPage, onNavigate, isOpen, onClose }: SidebarPro
       >
         <div className="h-16 flex items-center justify-between px-4 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <img
-              src="/signaflow_logo.png"
-              alt="SignaFlow"
-              className="h-10 w-10 object-contain"
-            />
+            <div className="h-10 w-10 rounded-lg bg-white/10 flex items-center justify-center">
+              <Radio className="text-white" size={24} />
+            </div>
             <h1 className="text-white text-xl font-bold tracking-tight">SignaFlow</h1>
           </div>
           <button

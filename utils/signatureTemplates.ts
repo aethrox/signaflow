@@ -45,13 +45,14 @@ export const signatureTemplates = {
   `.trim(),
 
   modern: (data: SignatureData) => `
-<table style="font-family: Arial, sans-serif; font-size: 14px; color: #1F2937; border-collapse: collapse; border-left: 4px solid #10B981; padding-left: 16px;">
+<table style="font-family: Arial, sans-serif; font-size: 14px; color: #1F2937; border-collapse: collapse;">
   <tr>
-    <td style="padding: 12px 0;">
-      <div style="font-weight: 600; font-size: 16px; margin-bottom: 4px;">${data.firstName} ${data.lastName}</div>
-      <div style="color: #10B981; font-weight: 500; margin-bottom: 8px;">${data.position}</div>
-      <div style="color: #6B7280; margin-bottom: 4px;">${data.email} | ${data.phone}</div>
-      <div style="color: #2563EB; font-weight: 500; margin-top: 4px;">www.company.com</div>
+    <td style="padding: 0; width: 4px; background-color: #10B981; border-radius: 2px;"></td>
+    <td style="padding: 16px 0 16px 16px;">
+      <div style="font-weight: 600; font-size: 16px; margin-bottom: 4px; color: #1F2937;">${data.firstName} ${data.lastName}</div>
+      <div style="color: #10B981; font-weight: 500; margin-bottom: 8px; font-size: 14px;">${data.position}</div>
+      <div style="color: #6B7280; margin-bottom: 4px; font-size: 14px;">${data.email} | ${data.phone}</div>
+      <div style="color: #2563EB; font-weight: 500; margin-top: 4px; font-size: 14px;">www.company.com</div>
     </td>
   </tr>
 </table>

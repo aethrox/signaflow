@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Search, Plus, Edit2, Trash2, X, Filter, Palette, FileDown, Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Plus, Edit2, Trash2, X, Filter, Palette, FileDown, Check, AlertCircle } from 'lucide-react';
 import { EmployeeDetailModal } from '../EmployeeDetailModal';
 import { AssignTemplateModal, GenerateSignaturesModal } from '../BulkActionModals';
 import { ConfirmDialog } from '../ConfirmDialog';
@@ -18,6 +18,12 @@ interface Employee {
 }
 
 export function Employees() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => setIsLoading(false), 1200);
+  }, []);
+
   const [employees, setEmployees] = useState<Employee[]>([
     {
       id: 1,
@@ -121,6 +127,7 @@ export function Employees() {
   const [showAssignTemplateModal, setShowAssignTemplateModal] = useState(false);
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; employeeId: number | null; isBulk: boolean }>({ show: false, employeeId: null, isBulk: false });
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -194,8 +201,46 @@ export function Employees() {
     setDeleteConfirm({ show: false, employeeId: null, isBulk: false });
   };
 
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!formData.firstName?.trim()) {
+      newErrors.firstName = "First name is required";
+    } else if (formData.firstName.length < 2) {
+      newErrors.firstName = "First name must be at least 2 characters";
+    }
+
+    if (!formData.lastName?.trim()) {
+      newErrors.lastName = "Last name is required";
+    } else if (formData.lastName.length < 2) {
+      newErrors.lastName = "Last name must be at least 2 characters";
+    }
+
+    if (!formData.email?.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Invalid email format";
+    }
+
+    if (!formData.position?.trim()) {
+      newErrors.position = "Position is required";
+    }
+
+    if (!formData.department?.trim()) {
+      newErrors.department = "Department is required";
+    }
+
+    if (formData.phone && !/^[\+]?[0-9\s\-\(\)]+$/.test(formData.phone)) {
+      newErrors.phone = "Invalid phone format";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleAdd = () => {
     setEditingEmployee(null);
+    setErrors({});
     setFormData({
       firstName: '',
       lastName: '',
@@ -211,6 +256,7 @@ export function Employees() {
   const handleEdit = (employee: Employee) => {
     setDetailEmployee(null);
     setEditingEmployee(employee);
+    setErrors({});
     setFormData({
       firstName: employee.firstName,
       lastName: employee.lastName,
@@ -234,6 +280,11 @@ export function Employees() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      toast.error("Please fix the errors before submitting");
+      return;
+    }
 
     if (editingEmployee) {
       setEmployees(
@@ -382,7 +433,84 @@ export function Employees() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
+        {isLoading ? (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="px-3 md:px-6 h-10 md:h-12 text-left">
+                    <div className="h-4 w-4 bg-gray-200 rounded animate-pulse"></div>
+                  </th>
+                  <th className="px-3 md:px-6 h-10 md:h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
+                    Employee
+                  </th>
+                  <th className="px-3 md:px-6 h-10 md:h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider hidden md:table-cell">
+                    Email
+                  </th>
+                  <th className="px-3 md:px-6 h-10 md:h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider hidden sm:table-cell">
+                    Position
+                  </th>
+                  <th className="px-3 md:px-6 h-10 md:h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider hidden lg:table-cell">
+                    Department
+                  </th>
+                  <th className="px-3 md:px-6 h-10 md:h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider hidden sm:table-cell">
+                    Status
+                  </th>
+                  <th className="px-3 md:px-6 h-10 md:h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                  <tr key={i} className="border-b border-gray-100">
+                    <td className="px-3 md:px-6 h-14 md:h-16">
+                      <div className="animate-pulse">
+                        <div className="h-4 w-4 bg-gray-200 rounded"></div>
+                      </div>
+                    </td>
+                    <td className="px-3 md:px-6 h-14 md:h-16">
+                      <div className="flex items-center gap-2 md:gap-3 animate-pulse">
+                        <div className="h-10 w-10 md:h-12 md:w-12 bg-gray-200 rounded-full flex-shrink-0"></div>
+                        <div className="space-y-2 min-w-0">
+                          <div className="h-3 md:h-4 bg-gray-200 rounded w-28 md:w-32"></div>
+                          <div className="h-3 bg-gray-200 rounded w-24 md:hidden"></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-3 md:px-6 h-14 md:h-16 hidden md:table-cell">
+                      <div className="animate-pulse">
+                        <div className="h-3 md:h-4 bg-gray-200 rounded w-40 md:w-48"></div>
+                      </div>
+                    </td>
+                    <td className="px-3 md:px-6 h-14 md:h-16 hidden sm:table-cell">
+                      <div className="animate-pulse">
+                        <div className="h-3 md:h-4 bg-gray-200 rounded w-24 md:w-28"></div>
+                      </div>
+                    </td>
+                    <td className="px-3 md:px-6 h-14 md:h-16 hidden lg:table-cell">
+                      <div className="animate-pulse">
+                        <div className="h-3 md:h-4 bg-gray-200 rounded w-20 md:w-24"></div>
+                      </div>
+                    </td>
+                    <td className="px-3 md:px-6 h-14 md:h-16 hidden sm:table-cell">
+                      <div className="animate-pulse">
+                        <div className="h-6 bg-gray-200 rounded-full w-16"></div>
+                      </div>
+                    </td>
+                    <td className="px-3 md:px-6 h-14 md:h-16">
+                      <div className="flex gap-1 md:gap-2 animate-pulse">
+                        <div className="h-8 w-8 bg-gray-200 rounded"></div>
+                        <div className="h-8 w-8 bg-gray-200 rounded"></div>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
@@ -500,6 +628,7 @@ export function Employees() {
             </tbody>
           </table>
         </div>
+        )}
       </div>
 
       {isModalOpen && (
@@ -520,67 +649,117 @@ export function Employees() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <div>
                   <label className="block text-sm font-medium text-[#1F2937] mb-2">
-                    First Name
+                    First Name *
                   </label>
                   <input
                     type="text"
-                    required
                     value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="h-10 px-3 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all"
+                    onChange={(e) => {
+                      setFormData({ ...formData, firstName: e.target.value });
+                      if (errors.firstName) setErrors({ ...errors, firstName: '' });
+                    }}
+                    className={`h-10 px-3 border rounded-lg w-full focus:ring-2 focus:outline-none transition-all ${
+                      errors.firstName ? 'border-red-500 focus:ring-red-500' : 'border-[#E5E7EB] focus:ring-[#2563EB] focus:border-[#2563EB]'
+                    }`}
                   />
+                  {errors.firstName && (
+                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                      <AlertCircle className="h-4 w-4" />
+                      {errors.firstName}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[#1F2937] mb-2">
-                    Last Name
+                    Last Name *
                   </label>
                   <input
                     type="text"
-                    required
                     value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="h-10 px-3 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all"
+                    onChange={(e) => {
+                      setFormData({ ...formData, lastName: e.target.value });
+                      if (errors.lastName) setErrors({ ...errors, lastName: '' });
+                    }}
+                    className={`h-10 px-3 border rounded-lg w-full focus:ring-2 focus:outline-none transition-all ${
+                      errors.lastName ? 'border-red-500 focus:ring-red-500' : 'border-[#E5E7EB] focus:ring-[#2563EB] focus:border-[#2563EB]'
+                    }`}
                   />
+                  {errors.lastName && (
+                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                      <AlertCircle className="h-4 w-4" />
+                      {errors.lastName}
+                    </p>
+                  )}
                 </div>
               </div>
 
               <div className="mb-4">
                 <label className="block text-sm font-medium text-[#1F2937] mb-2">
-                  Email
+                  Email *
                 </label>
                 <input
                   type="email"
-                  required
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="h-10 px-3 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all"
+                  onChange={(e) => {
+                    setFormData({ ...formData, email: e.target.value });
+                    if (errors.email) setErrors({ ...errors, email: '' });
+                  }}
+                  className={`h-10 px-3 border rounded-lg w-full focus:ring-2 focus:outline-none transition-all ${
+                    errors.email ? 'border-red-500 focus:ring-red-500' : 'border-[#E5E7EB] focus:ring-[#2563EB] focus:border-[#2563EB]'
+                  }`}
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                    <AlertCircle className="h-4 w-4" />
+                    {errors.email}
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-[#1F2937] mb-2">
-                    Position
+                    Position *
                   </label>
                   <input
                     type="text"
-                    required
                     value={formData.position}
-                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                    className="h-10 px-3 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all"
+                    onChange={(e) => {
+                      setFormData({ ...formData, position: e.target.value });
+                      if (errors.position) setErrors({ ...errors, position: '' });
+                    }}
+                    className={`h-10 px-3 border rounded-lg w-full focus:ring-2 focus:outline-none transition-all ${
+                      errors.position ? 'border-red-500 focus:ring-red-500' : 'border-[#E5E7EB] focus:ring-[#2563EB] focus:border-[#2563EB]'
+                    }`}
                   />
+                  {errors.position && (
+                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                      <AlertCircle className="h-4 w-4" />
+                      {errors.position}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[#1F2937] mb-2">
-                    Department
+                    Department *
                   </label>
                   <input
                     type="text"
-                    required
                     value={formData.department}
-                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                    className="h-10 px-3 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all"
+                    onChange={(e) => {
+                      setFormData({ ...formData, department: e.target.value });
+                      if (errors.department) setErrors({ ...errors, department: '' });
+                    }}
+                    className={`h-10 px-3 border rounded-lg w-full focus:ring-2 focus:outline-none transition-all ${
+                      errors.department ? 'border-red-500 focus:ring-red-500' : 'border-[#E5E7EB] focus:ring-[#2563EB] focus:border-[#2563EB]'
+                    }`}
                   />
+                  {errors.department && (
+                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                      <AlertCircle className="h-4 w-4" />
+                      {errors.department}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -590,14 +769,24 @@ export function Employees() {
                 </label>
                 <input
                   type="tel"
-                  required
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  pattern="[\+]?[0-9\s\-\(\)]+"
+                  onChange={(e) => {
+                    setFormData({ ...formData, phone: e.target.value });
+                    if (errors.phone) setErrors({ ...errors, phone: '' });
+                  }}
                   placeholder="+90 555 123 4567"
-                  className="h-10 px-3 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all"
+                  className={`h-10 px-3 border rounded-lg w-full focus:ring-2 focus:outline-none transition-all ${
+                    errors.phone ? 'border-red-500 focus:ring-red-500' : 'border-[#E5E7EB] focus:ring-[#2563EB] focus:border-[#2563EB]'
+                  }`}
                 />
-                <p className="text-xs text-[#6B7280] mt-1">Format: +90 555 123 4567</p>
+                {errors.phone ? (
+                  <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                    <AlertCircle className="h-4 w-4" />
+                    {errors.phone}
+                  </p>
+                ) : (
+                  <p className="text-xs text-[#6B7280] mt-1">Format: +90 555 123 4567</p>
+                )}
               </div>
 
               <div className="flex gap-3 justify-end">

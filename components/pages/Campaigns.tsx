@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar, Clock, Edit2, Trash2, Copy, Plus, Square } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -16,6 +16,12 @@ interface Campaign {
 }
 
 export function Campaigns() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => setIsLoading(false), 1000);
+  }, []);
+
   const [campaigns, setCampaigns] = useState<Campaign[]>([
     {
       id: 1,
@@ -196,9 +202,32 @@ export function Campaigns() {
         <p className="text-[#6B7280] text-sm md:text-base">Create promotional banners for your email signatures</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+      {isLoading ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div className="animate-pulse space-y-4">
+              <div className="h-6 bg-gray-200 rounded w-40"></div>
+              <div className="h-10 bg-gray-200 rounded"></div>
+              <div className="h-32 bg-gray-200 rounded"></div>
+              <div className="h-10 bg-gray-200 rounded"></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="h-10 bg-gray-200 rounded"></div>
+                <div className="h-10 bg-gray-200 rounded"></div>
+              </div>
+              <div className="h-12 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div className="animate-pulse space-y-4">
+              <div className="h-6 bg-gray-200 rounded w-32"></div>
+              <div className="h-64 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <h2 className="text-lg font-bold text-[#1F2937]">
@@ -470,7 +499,8 @@ export function Campaigns() {
             )}
           </div>
         </div>
-      </div>
+        </div>
+      )}
 
       <ConfirmDialog
         isOpen={deleteConfirm.show}

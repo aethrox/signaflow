@@ -1,6 +1,13 @@
+import { useState, useEffect } from 'react';
 import { Users, Mail, TrendingUp } from 'lucide-react';
 
 export function Dashboard() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => setIsLoading(false), 1500);
+  }, []);
+
   const metrics = [
     {
       title: 'Total Employees',
@@ -40,7 +47,71 @@ export function Dashboard() {
         <p className="text-[#6B7280] text-sm md:text-base">Welcome back! Here's what's happening with your email signatures.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-10">
+      {isLoading ? (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-10">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100">
+                <div className="animate-pulse">
+                  <div className="h-10 w-10 md:h-12 md:w-12 bg-gray-200 rounded-lg mb-3 md:mb-4"></div>
+                  <div className="h-8 md:h-12 bg-gray-200 rounded w-24 md:w-32 mb-1 md:mb-2"></div>
+                  <div className="h-3 md:h-4 bg-gray-200 rounded w-28 md:w-36"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="px-4 md:px-6 py-3 md:py-4 border-b border-gray-100">
+              <div className="h-5 md:h-6 bg-gray-200 rounded w-32 animate-pulse"></div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="px-3 md:px-6 h-10 md:h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
+                      User
+                    </th>
+                    <th className="px-3 md:px-6 h-10 md:h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider hidden sm:table-cell">
+                      Action
+                    </th>
+                    <th className="px-3 md:px-6 h-10 md:h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
+                      Time
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <tr key={i} className="border-b border-gray-100">
+                      <td className="px-3 md:px-6 h-14 md:h-16">
+                        <div className="flex items-center gap-2 md:gap-3 animate-pulse">
+                          <div className="h-8 w-8 md:h-10 md:w-10 bg-gray-200 rounded-full flex-shrink-0"></div>
+                          <div className="space-y-2 flex-1">
+                            <div className="h-3 md:h-4 bg-gray-200 rounded w-28 md:w-32"></div>
+                            <div className="h-3 bg-gray-200 rounded w-24 sm:hidden"></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-3 md:px-6 h-14 md:h-16 hidden sm:table-cell">
+                        <div className="animate-pulse">
+                          <div className="h-3 md:h-4 bg-gray-200 rounded w-36 md:w-48"></div>
+                        </div>
+                      </td>
+                      <td className="px-3 md:px-6 h-14 md:h-16">
+                        <div className="animate-pulse">
+                          <div className="h-3 md:h-4 bg-gray-200 rounded w-20 md:w-24"></div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-10">
         {metrics.map((metric, index) => {
           const Icon = metric.icon;
           return (
@@ -107,6 +178,8 @@ export function Dashboard() {
           </table>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }

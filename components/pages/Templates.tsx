@@ -1,10 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Eye, Check, Filter, Users } from 'lucide-react';
 import { EnhancedTemplatePreview } from '../EnhancedTemplatePreview';
 import { ApplyToDepartmentModal } from '../ApplyToDepartmentModal';
 import { toast } from 'sonner';
 
 export function Templates() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => setIsLoading(false), 1000);
+  }, []);
+
   const [activeTemplateId, setActiveTemplateId] = useState<number>(2);
   const [previewTemplate, setPreviewTemplate] = useState<number | null>(null);
   const [departmentFilter, setDepartmentFilter] = useState('All');
@@ -136,8 +142,39 @@ export function Templates() {
         </select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        {filteredTemplates.map((template) => (
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="bg-gray-50 p-6 min-h-[280px] flex items-center justify-center">
+                <div className="w-full animate-pulse">
+                  <div className="h-48 bg-gray-200 rounded-lg"></div>
+                </div>
+              </div>
+              <div className="p-6 border-t border-gray-100">
+                <div className="animate-pulse space-y-4">
+                  <div className="h-6 bg-gray-200 rounded w-32"></div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-full"></div>
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                  </div>
+                  <div className="h-4 bg-gray-200 rounded w-40"></div>
+                  <div className="flex gap-2">
+                    <div className="h-6 bg-gray-200 rounded-full w-20"></div>
+                    <div className="h-6 bg-gray-200 rounded-full w-20"></div>
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <div className="h-10 bg-gray-200 rounded flex-1"></div>
+                    <div className="h-10 bg-gray-200 rounded flex-1"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          {filteredTemplates.map((template) => (
           <div
             key={template.id}
             className={`bg-white rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 duration-300 ${
@@ -203,7 +240,8 @@ export function Templates() {
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      )}
 
       {previewTemplate !== null && (
         <EnhancedTemplatePreview

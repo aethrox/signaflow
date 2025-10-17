@@ -61,19 +61,19 @@ export function EmployeeDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-3xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-100 p-6 flex items-center justify-between rounded-t-2xl z-10">
-          <h2 className="text-2xl font-bold text-[#1F2937]">Employee Details</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-3xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-gray-100 p-4 sm:p-6 flex items-center justify-between rounded-t-2xl z-10">
+          <h2 className="text-xl sm:text-2xl font-bold text-[#1F2937]">Employee Details</h2>
           <button
             onClick={onClose}
-            className="text-[#6B7280] hover:text-[#1F2937] transition-colors p-2 hover:bg-gray-100 rounded-lg"
+            className="text-[#6B7280] hover:text-[#1F2937] transition-colors p-2 hover:bg-gray-100 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
           >
             <X size={24} />
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <div className="flex items-start gap-4 mb-6 pb-6 border-b border-gray-100">
             <div className="w-16 h-16 rounded-full bg-[#E0E7FF] flex items-center justify-center text-[#2563EB] font-semibold text-xl flex-shrink-0">
               {employee.firstName[0]}{employee.lastName[0]}

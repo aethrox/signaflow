@@ -29,9 +29,9 @@ export function ConfirmDialog({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl relative">
-        <div className="p-6">
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl relative">
+        <div className="p-4 sm:p-6">
           <div className="flex items-start gap-4">
             <div
               className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center ${
@@ -46,7 +46,7 @@ export function ConfirmDialog({
             </div>
             <button
               onClick={onClose}
-              className="flex-shrink-0 text-[#6B7280] hover:text-[#1F2937] transition-colors p-2 hover:bg-gray-100 rounded-lg"
+              className="flex-shrink-0 text-[#6B7280] hover:text-[#1F2937] transition-colors p-2 hover:bg-gray-100 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
             >
               <X size={20} />
             </button>

@@ -127,41 +127,39 @@ export function GenerateSignaturesModal({
 }: GenerateSignaturesModalProps) {
   const [progress, setProgress] = useState(0);
   const [completedEmployees, setCompletedEmployees] = useState<number[]>([]);
-  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
-    if (isOpen && !isGenerating) {
+    if (!isOpen) {
       setProgress(0);
       setCompletedEmployees([]);
-      setIsGenerating(true);
-
-      const totalEmployees = selectedEmployees.length;
-      let currentIndex = 0;
-
-      const interval = setInterval(() => {
-        if (currentIndex < totalEmployees) {
-          setCompletedEmployees((prev) => [...prev, selectedEmployees[currentIndex].id]);
-          currentIndex++;
-          setProgress((currentIndex / totalEmployees) * 100);
-        } else {
-          setIsGenerating(false);
-          clearInterval(interval);
-
-          setTimeout(() => {
-            toast.success(`${totalEmployees} signature${totalEmployees > 1 ? 's' : ''} generated successfully!`);
-            onClose();
-          }, 2000);
-        }
-      }, 800);
-
-      return () => clearInterval(interval);
+      return;
     }
-  }, [isOpen, selectedEmployees, isGenerating, onClose]);
 
-  const handleClose = () => {
     setProgress(0);
     setCompletedEmployees([]);
-    setIsGenerating(false);
+
+    const totalEmployees = selectedEmployees.length;
+    let currentIndex = 0;
+
+    const interval = setInterval(() => {
+      if (currentIndex < totalEmployees) {
+        setCompletedEmployees((prev) => [...prev, selectedEmployees[currentIndex].id]);
+        currentIndex++;
+        setProgress((currentIndex / totalEmployees) * 100);
+      } else {
+        clearInterval(interval);
+
+        setTimeout(() => {
+          toast.success(`Signatures generated for ${totalEmployees} employee${totalEmployees > 1 ? 's' : ''}`);
+          onClose();
+        }, 1000);
+      }
+    }, (2000 / totalEmployees));
+
+    return () => clearInterval(interval);
+  }, [isOpen, selectedEmployees, onClose]);
+
+  const handleClose = () => {
     onClose();
   };
 

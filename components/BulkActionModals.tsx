@@ -23,12 +23,19 @@ export function AssignTemplateModal({
 }: AssignTemplateModalProps) {
   const [selectedTemplate, setSelectedTemplate] = useState('professional');
   const [generateImmediately, setGenerateImmediately] = useState(true);
+  const [isAssigning, setIsAssigning] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setIsAssigning(false);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   const handleAssign = () => {
+    setIsAssigning(true);
     onAssign(selectedTemplate, generateImmediately);
-    onClose();
   };
 
   return (
@@ -92,15 +99,24 @@ export function AssignTemplateModal({
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 bg-white border border-[#E5E7EB] text-[#1F2937] rounded-lg font-semibold hover:bg-gray-50 transition-all"
+              disabled={isAssigning}
+              className="flex-1 px-4 py-2.5 bg-white border border-[#E5E7EB] text-[#1F2937] rounded-lg font-semibold hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
             <button
               onClick={handleAssign}
-              className="flex-1 px-4 py-2.5 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all shadow-sm"
+              disabled={isAssigning}
+              className="flex-1 px-4 py-2.5 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Assign Template
+              {isAssigning ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  Assigning...
+                </>
+              ) : (
+                'Assign Template'
+              )}
             </button>
           </div>
         </div>

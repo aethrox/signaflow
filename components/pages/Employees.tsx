@@ -171,11 +171,20 @@ export function Employees() {
   };
 
   const handleAssignTemplate = (_templateId: string, generateImmediately: boolean) => {
-    toast.success(`Template assigned to ${selectedEmployeeIds.length} employees`);
     if (generateImmediately) {
-      setShowGenerateModal(true);
+      setTimeout(() => {
+        toast.success(`Template assigned to ${selectedEmployeeIds.length} employees`);
+        setShowAssignTemplateModal(false);
+        setTimeout(() => {
+          setShowGenerateModal(true);
+        }, 300);
+      }, 2000);
     } else {
-      setSelectedEmployeeIds([]);
+      setTimeout(() => {
+        toast.success(`Template assigned to ${selectedEmployeeIds.length} employees`);
+        setShowAssignTemplateModal(false);
+        setSelectedEmployeeIds([]);
+      }, 2000);
     }
   };
 

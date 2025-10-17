@@ -210,6 +210,7 @@ export function Templates() {
           templateId={previewTemplate}
           onClose={() => setPreviewTemplate(null)}
           onSetActive={handleSetActive}
+          onApplyToDepartment={handleApplyToDepartment}
         />
       )}
 

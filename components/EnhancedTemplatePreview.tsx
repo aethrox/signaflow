@@ -7,6 +7,7 @@ interface EnhancedTemplatePreviewProps {
   templateId: number;
   onClose: () => void;
   onSetActive: (templateId: number) => void;
+  onApplyToDepartment?: (templateId: number, templateName: string) => void;
 }
 
 const mockEmployees: SignatureData[] = [
@@ -40,6 +41,7 @@ export function EnhancedTemplatePreview({
   templateId,
   onClose,
   onSetActive,
+  onApplyToDepartment,
 }: EnhancedTemplatePreviewProps) {
   const [selectedEmployeeIndex, setSelectedEmployeeIndex] = useState(0);
   const selectedEmployee = mockEmployees[selectedEmployeeIndex];
@@ -54,7 +56,12 @@ export function EnhancedTemplatePreview({
   };
 
   const handleApplyToDepartment = () => {
-    toast.info('Apply to Department feature coming soon!');
+    if (onApplyToDepartment) {
+      onApplyToDepartment(templateId, templateName);
+      onClose();
+    } else {
+      toast.info('Apply to Department feature coming soon!');
+    }
   };
 
   return (

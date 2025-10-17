@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Trash2, X, Filter, Palette, FileDown, Check, AlertCircle } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, X, Filter, Palette, FileDown, Check, AlertCircle, Loader2 } from 'lucide-react';
 import { EmployeeDetailModal } from '../EmployeeDetailModal';
 import { AssignTemplateModal, GenerateSignaturesModal } from '../BulkActionModals';
 import { ConfirmDialog } from '../ConfirmDialog';
@@ -128,6 +128,7 @@ export function Employees() {
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; employeeId: number | null; isBulk: boolean }>({ show: false, employeeId: null, isBulk: false });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -278,7 +279,7 @@ export function Employees() {
     setDeleteConfirm({ show: true, employeeId: id, isBulk: false });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -286,27 +287,37 @@ export function Employees() {
       return;
     }
 
-    if (editingEmployee) {
-      setEmployees(
-        employees.map((emp) =>
-          emp.id === editingEmployee.id
-            ? { ...emp, ...formData }
-            : emp
-        )
-      );
-      toast.success('Employee updated successfully');
-    } else {
-      const newEmployee: Employee = {
-        id: Math.max(...employees.map((e) => e.id)) + 1,
-        ...formData,
-        status: 'active',
-        currentTemplate: formData.currentTemplate,
-      };
-      setEmployees([...employees, newEmployee]);
-      toast.success('Employee added successfully');
-    }
+    setIsSubmitting(true);
 
-    setIsModalOpen(false);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      if (editingEmployee) {
+        setEmployees(
+          employees.map((emp) =>
+            emp.id === editingEmployee.id
+              ? { ...emp, ...formData }
+              : emp
+          )
+        );
+        toast.success('Employee updated successfully');
+      } else {
+        const newEmployee: Employee = {
+          id: Math.max(...employees.map((e) => e.id)) + 1,
+          ...formData,
+          status: 'active',
+          currentTemplate: formData.currentTemplate,
+        };
+        setEmployees([...employees, newEmployee]);
+        toast.success('Employee added successfully');
+      }
+
+      setIsModalOpen(false);
+    } catch (error) {
+      toast.error('Failed to save employee');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -793,15 +804,24 @@ export function Employees() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-6 py-2.5 bg-white border border-[#E5E7EB] text-[#1F2937] rounded-lg font-semibold hover:bg-gray-50 transition-all"
+                  disabled={isSubmitting}
+                  className="px-6 py-2.5 bg-white border border-[#E5E7EB] text-[#1F2937] rounded-lg font-semibold hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all shadow-sm"
+                  disabled={isSubmitting}
+                  className="px-6 py-2.5 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[140px]"
                 >
-                  {editingEmployee ? 'Save Changes' : 'Add Employee'}
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>{editingEmployee ? 'Save Changes' : 'Add Employee'}</>
+                  )}
                 </button>
               </div>
             </form>

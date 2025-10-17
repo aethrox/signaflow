@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Clock, Edit2, Trash2, Copy, Plus, Square } from 'lucide-react';
+import { Calendar, Clock, Edit2, Trash2, Copy, Plus, Square, AlertCircle, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '../ConfirmDialog';
@@ -64,29 +64,80 @@ export function Campaigns() {
     endDate: campaigns[0].endDate,
   });
   const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; campaignId: number | null }>({ show: false, campaignId: null });
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const editingCampaign = campaigns.find((c) => c.id === editingCampaignId);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!formData.title?.trim()) {
+      newErrors.title = "Campaign title is required";
+    }
+
+    if (!formData.message?.trim()) {
+      newErrors.message = "Campaign message is required";
+    } else if (formData.message.length > 150) {
+      newErrors.message = "Message must be 150 characters or less";
+    }
+
+    if (!formData.linkUrl?.trim()) {
+      newErrors.linkUrl = "Link URL is required";
+    } else if (!/^https?:\/\/.+/.test(formData.linkUrl)) {
+      newErrors.linkUrl = "URL must start with http:// or https://";
+    }
+
+    if (!formData.startDate) {
+      newErrors.startDate = "Start date is required";
+    }
+
+    if (!formData.endDate) {
+      newErrors.endDate = "End date is required";
+    } else if (formData.startDate && formData.endDate < formData.startDate) {
+      newErrors.endDate = "End date must be after start date";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingCampaignId) {
-      const newStatus = getCampaignStatus(formData.startDate, formData.endDate);
 
-      setCampaigns(
-        campaigns.map((c) =>
-          c.id === editingCampaignId
-            ? { ...c, ...formData, status: newStatus }
-            : c
-        )
-      );
+    if (!validateForm()) {
+      toast.error("Please fix the errors before submitting");
+      return;
+    }
 
-      if (newStatus === 'expired') {
-        toast.warning('Campaign dates are in the past', {
-          description: 'This campaign will be marked as expired',
-        });
-      } else {
-        toast.success('Campaign updated successfully!');
+    setIsSubmitting(true);
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      if (editingCampaignId) {
+        const newStatus = getCampaignStatus(formData.startDate, formData.endDate);
+
+        setCampaigns(
+          campaigns.map((c) =>
+            c.id === editingCampaignId
+              ? { ...c, ...formData, status: newStatus }
+              : c
+          )
+        );
+
+        if (newStatus === 'expired') {
+          toast.warning('Campaign dates are in the past', {
+            description: 'This campaign will be marked as expired',
+          });
+        } else {
+          toast.success('Campaign updated successfully!');
+        }
       }
+    } catch (error) {
+      toast.error('Failed to save campaign');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -141,6 +192,7 @@ export function Campaigns() {
 
   const handleEditCampaign = (campaign: Campaign) => {
     setEditingCampaignId(campaign.id);
+    setErrors({});
     setFormData({
       title: campaign.title,
       message: campaign.message,
@@ -257,48 +309,79 @@ export function Campaigns() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-[#1F2937] mb-2">
-                  Campaign Title
+                  Campaign Title *
                 </label>
                 <input
                   type="text"
-                  required
                   value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="h-10 px-3 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all"
+                  onChange={(e) => {
+                    setFormData({ ...formData, title: e.target.value });
+                    if (errors.title) setErrors({ ...errors, title: '' });
+                  }}
+                  className={`h-10 px-3 border rounded-lg w-full focus:ring-2 focus:outline-none transition-all ${
+                    errors.title ? 'border-red-500 focus:ring-red-500' : 'border-[#E5E7EB] focus:ring-[#2563EB] focus:border-[#2563EB]'
+                  }`}
                   placeholder="e.g., Summer Sale"
                 />
+                {errors.title && (
+                  <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                    <AlertCircle className="h-4 w-4" />
+                    {errors.title}
+                  </p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-[#1F2937] mb-2">
-                  Message (max 150 characters)
+                  Message (max 150 characters) *
                 </label>
                 <textarea
-                  required
                   maxLength={150}
                   value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  className="px-3 py-2 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all resize-none"
+                  onChange={(e) => {
+                    setFormData({ ...formData, message: e.target.value });
+                    if (errors.message) setErrors({ ...errors, message: '' });
+                  }}
+                  className={`px-3 py-2 border rounded-lg w-full focus:ring-2 focus:outline-none transition-all resize-none ${
+                    errors.message ? 'border-red-500 focus:ring-red-500' : 'border-[#E5E7EB] focus:ring-[#2563EB] focus:border-[#2563EB]'
+                  }`}
                   rows={3}
                   placeholder="Enter your campaign message..."
                 />
-                <div className="text-xs text-[#6B7280] mt-1 text-right">
-                  {formData.message.length}/150
-                </div>
+                {errors.message ? (
+                  <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                    <AlertCircle className="h-4 w-4" />
+                    {errors.message}
+                  </p>
+                ) : (
+                  <div className="text-xs text-[#6B7280] mt-1 text-right">
+                    {formData.message.length}/150
+                  </div>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-[#1F2937] mb-2">
-                  Link URL
+                  Link URL *
                 </label>
                 <input
                   type="url"
-                  required
                   value={formData.linkUrl}
-                  onChange={(e) => setFormData({ ...formData, linkUrl: e.target.value })}
-                  className="h-10 px-3 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all"
+                  onChange={(e) => {
+                    setFormData({ ...formData, linkUrl: e.target.value });
+                    if (errors.linkUrl) setErrors({ ...errors, linkUrl: '' });
+                  }}
+                  className={`h-10 px-3 border rounded-lg w-full focus:ring-2 focus:outline-none transition-all ${
+                    errors.linkUrl ? 'border-red-500 focus:ring-red-500' : 'border-[#E5E7EB] focus:ring-[#2563EB] focus:border-[#2563EB]'
+                  }`}
                   placeholder="https://example.com"
                 />
+                {errors.linkUrl && (
+                  <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                    <AlertCircle className="h-4 w-4" />
+                    {errors.linkUrl}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -307,40 +390,68 @@ export function Campaigns() {
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs text-[#6B7280] mb-1.5">Start Date</label>
+                    <label className="block text-xs text-[#6B7280] mb-1.5">Start Date *</label>
                     <div className="relative">
                       <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" size={16} />
                       <input
                         type="date"
-                        required
                         value={formData.startDate}
-                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                        className="h-10 pl-10 pr-3 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all text-sm"
+                        onChange={(e) => {
+                          setFormData({ ...formData, startDate: e.target.value });
+                          if (errors.startDate) setErrors({ ...errors, startDate: '' });
+                        }}
+                        className={`h-10 pl-10 pr-3 border rounded-lg w-full focus:ring-2 focus:outline-none transition-all text-sm ${
+                          errors.startDate ? 'border-red-500 focus:ring-red-500' : 'border-[#E5E7EB] focus:ring-[#2563EB] focus:border-[#2563EB]'
+                        }`}
                       />
                     </div>
+                    {errors.startDate && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {errors.startDate}
+                      </p>
+                    )}
                   </div>
                   <div>
-                    <label className="block text-xs text-[#6B7280] mb-1.5">End Date</label>
+                    <label className="block text-xs text-[#6B7280] mb-1.5">End Date *</label>
                     <div className="relative">
                       <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" size={16} />
                       <input
                         type="date"
-                        required
                         value={formData.endDate}
-                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                        onChange={(e) => {
+                          setFormData({ ...formData, endDate: e.target.value });
+                          if (errors.endDate) setErrors({ ...errors, endDate: '' });
+                        }}
                         min={formData.startDate}
-                        className="h-10 pl-10 pr-3 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all text-sm"
+                        className={`h-10 pl-10 pr-3 border rounded-lg w-full focus:ring-2 focus:outline-none transition-all text-sm ${
+                          errors.endDate ? 'border-red-500 focus:ring-red-500' : 'border-[#E5E7EB] focus:ring-[#2563EB] focus:border-[#2563EB]'
+                        }`}
                       />
                     </div>
+                    {errors.endDate && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {errors.endDate}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full px-6 py-2.5 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all shadow-sm"
+                disabled={isSubmitting}
+                className="w-full px-6 py-2.5 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                Update Campaign
+                {isSubmitting ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Update Campaign'
+                )}
               </button>
             </form>
           </div>

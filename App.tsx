@@ -7,6 +7,7 @@ import { Dashboard } from './components/pages/Dashboard';
 import { Employees } from './components/pages/Employees';
 import { Templates } from './components/pages/Templates';
 import { Campaigns } from './components/pages/Campaigns';
+import { Settings } from './components/pages/Settings';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
@@ -34,12 +35,7 @@ export default function App() {
       case 'campaigns':
         return <Campaigns />;
       case 'settings':
-        return (
-          <div className="p-4 md:p-8">
-            <h1 className="text-[#1F2937] text-2xl md:text-3xl font-bold mb-2">Settings</h1>
-            <p className="text-[#6B7280]">Settings page coming soon...</p>
-          </div>
-        );
+        return <Settings />;
       default:
         return <Dashboard />;
     }

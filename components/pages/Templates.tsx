@@ -1,29 +1,44 @@
 import { useState } from 'react';
-import { Eye, Check } from 'lucide-react';
+import { Eye, Check, Filter } from 'lucide-react';
 import { EnhancedTemplatePreview } from '../EnhancedTemplatePreview';
 import { toast } from 'sonner';
 
 export function Templates() {
   const [activeTemplateId, setActiveTemplateId] = useState<number>(2);
   const [previewTemplate, setPreviewTemplate] = useState<number | null>(null);
+  const [departmentFilter, setDepartmentFilter] = useState('All');
+
+  const templateUsage = {
+    1: { count: 1, departments: ['Design'] },
+    2: { count: 5, departments: ['Executive', 'Sales'] },
+    3: { count: 2, departments: ['Technology', 'Marketing'] },
+  };
 
   const templates = [
     {
       id: 1,
       name: 'Minimal',
       description: 'Clean and simple design with essential information',
+      departments: ['Design'],
     },
     {
       id: 2,
       name: 'Professional',
       description: 'Complete signature with logo, details, and social icons',
+      departments: ['Executive', 'Sales'],
     },
     {
       id: 3,
       name: 'Modern',
       description: 'Contemporary design with colorful accents',
+      departments: ['Technology', 'Marketing'],
     },
   ];
+
+  const filteredTemplates = templates.filter((template) => {
+    if (departmentFilter === 'All') return true;
+    return template.departments.includes(departmentFilter);
+  });
 
   const handleSetActive = (templateId: number) => {
     setActiveTemplateId(templateId);
@@ -83,8 +98,27 @@ export function Templates() {
         <p className="text-[#6B7280] text-sm md:text-base">Choose a template for your team's email signatures</p>
       </div>
 
+      <div className="mb-6 bg-white rounded-lg border border-gray-200 p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Filter size={16} className="text-[#6B7280]" />
+          <span className="text-sm font-semibold text-[#1F2937]">Filter by Department</span>
+        </div>
+        <select
+          value={departmentFilter}
+          onChange={(e) => setDepartmentFilter(e.target.value)}
+          className="w-full sm:w-auto h-10 px-3 border border-[#E5E7EB] rounded-lg focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all text-sm"
+        >
+          <option value="All">All Departments</option>
+          <option value="Executive">Executive</option>
+          <option value="Technology">Technology</option>
+          <option value="Sales">Sales</option>
+          <option value="Marketing">Marketing</option>
+          <option value="Design">Design</option>
+        </select>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        {templates.map((template) => (
+        {filteredTemplates.map((template) => (
           <div
             key={template.id}
             className={`bg-white rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 duration-300 ${
@@ -105,7 +139,21 @@ export function Templates() {
 
             <div className="p-6 border-t border-gray-100">
               <h3 className="text-lg font-bold text-[#1F2937] mb-2">{template.name}</h3>
-              <p className="text-sm text-[#6B7280] mb-4">{template.description}</p>
+              <p className="text-sm text-[#6B7280] mb-3">{template.description}</p>
+
+              <div className="mb-3">
+                <p className="text-xs text-[#6B7280] mb-1">Used by: {templateUsage[template.id as keyof typeof templateUsage].count} employees</p>
+                <div className="flex flex-wrap gap-1">
+                  {template.departments.map((dept) => (
+                    <span
+                      key={dept}
+                      className="inline-block px-2 py-1 bg-[#E0E7FF] text-[#2563EB] text-xs font-medium rounded"
+                    >
+                      {dept}
+                    </span>
+                  ))}
+                </div>
+              </div>
 
               <div className="flex gap-2">
                 <button

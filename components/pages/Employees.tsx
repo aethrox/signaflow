@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Plus, Edit2, Trash2, X } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, X, Filter } from 'lucide-react';
 import { EmployeeDetailModal } from '../EmployeeDetailModal';
 import { toast } from 'sonner';
 
@@ -103,6 +103,9 @@ export function Employees() {
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [detailEmployee, setDetailEmployee] = useState<Employee | null>(null);
   const [currentTemplateId, setCurrentTemplateId] = useState(2);
+  const [departmentFilter, setDepartmentFilter] = useState('All');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [templateFilter, setTemplateFilter] = useState('All');
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -112,11 +115,25 @@ export function Employees() {
     phone: '',
   });
 
-  const filteredEmployees = employees.filter((emp) =>
-    `${emp.firstName} ${emp.lastName} ${emp.email} ${emp.position}`
+  const filteredEmployees = employees.filter((emp) => {
+    const matchesSearch = `${emp.firstName} ${emp.lastName} ${emp.email} ${emp.position}`
       .toLowerCase()
-      .includes(searchTerm.toLowerCase())
-  );
+      .includes(searchTerm.toLowerCase());
+    const matchesDepartment = departmentFilter === 'All' || emp.department === departmentFilter;
+    const matchesStatus = statusFilter === 'All' || emp.status === statusFilter.toLowerCase();
+    const matchesTemplate = templateFilter === 'All';
+
+    return matchesSearch && matchesDepartment && matchesStatus && matchesTemplate;
+  });
+
+  const handleClearFilters = () => {
+    setDepartmentFilter('All');
+    setStatusFilter('All');
+    setTemplateFilter('All');
+    setSearchTerm('');
+  };
+
+  const hasActiveFilters = departmentFilter !== 'All' || statusFilter !== 'All' || templateFilter !== 'All' || searchTerm !== '';
 
   const handleAdd = () => {
     setEditingEmployee(null);
@@ -198,16 +215,72 @@ export function Employees() {
         </button>
       </div>
 
-      <div className="mb-4 md:mb-6">
-        <div className="relative w-full md:w-[400px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" size={20} />
-          <input
-            type="text"
-            placeholder="Search employees..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full h-10 pl-10 pr-3 border border-[#E5E7EB] rounded-lg focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all"
-          />
+      <div className="mb-4 md:mb-6 space-y-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Filter size={16} className="text-[#6B7280]" />
+            <span className="text-sm font-semibold text-[#1F2937]">Filters</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <select
+              value={departmentFilter}
+              onChange={(e) => setDepartmentFilter(e.target.value)}
+              className="h-10 px-3 border border-[#E5E7EB] rounded-lg focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all text-sm"
+            >
+              <option value="All">All Departments</option>
+              <option value="Executive">Executive</option>
+              <option value="Technology">Technology</option>
+              <option value="Sales">Sales</option>
+              <option value="Marketing">Marketing</option>
+              <option value="Design">Design</option>
+            </select>
+
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="h-10 px-3 border border-[#E5E7EB] rounded-lg focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all text-sm"
+            >
+              <option value="All">All Status</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+
+            <select
+              value={templateFilter}
+              onChange={(e) => setTemplateFilter(e.target.value)}
+              className="h-10 px-3 border border-[#E5E7EB] rounded-lg focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all text-sm"
+            >
+              <option value="All">All Templates</option>
+              <option value="Minimal">Minimal</option>
+              <option value="Professional">Professional</option>
+              <option value="Modern">Modern</option>
+            </select>
+
+            {hasActiveFilters && (
+              <button
+                onClick={handleClearFilters}
+                className="h-10 px-4 bg-white border border-[#E5E7EB] text-[#6B7280] rounded-lg hover:bg-gray-50 transition-all text-sm font-medium"
+              >
+                Clear Filters
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+          <div className="relative w-full sm:w-[400px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" size={20} />
+            <input
+              type="text"
+              placeholder="Search employees..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full h-10 pl-10 pr-3 border border-[#E5E7EB] rounded-lg focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all"
+            />
+          </div>
+          <div className="text-sm text-[#6B7280]">
+            Showing {filteredEmployees.length} of {employees.length} employees
+          </div>
         </div>
       </div>
 
@@ -237,7 +310,30 @@ export function Employees() {
               </tr>
             </thead>
             <tbody>
-              {filteredEmployees.map((employee) => (
+              {filteredEmployees.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <Search size={48} className="text-gray-300 mb-3" />
+                      <h3 className="text-lg font-semibold text-[#1F2937] mb-1">
+                        No employees match filters
+                      </h3>
+                      <p className="text-sm text-[#6B7280] mb-4">
+                        Try adjusting your filters or search term
+                      </p>
+                      {hasActiveFilters && (
+                        <button
+                          onClick={handleClearFilters}
+                          className="px-4 py-2 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all text-sm"
+                        >
+                          Clear All Filters
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredEmployees.map((employee) => (
                 <tr
                   key={employee.id}
                   onClick={() => handleRowClick(employee)}
@@ -281,7 +377,8 @@ export function Employees() {
                     </div>
                   </td>
                 </tr>
-              ))}
+                ))
+              )}
             </tbody>
           </table>
         </div>

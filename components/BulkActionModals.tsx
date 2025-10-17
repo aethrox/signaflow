@@ -139,13 +139,20 @@ export function GenerateSignaturesModal({
     setCompletedEmployees([]);
 
     const totalEmployees = selectedEmployees.length;
+    if (totalEmployees === 0) return;
+
     let currentIndex = 0;
 
     const interval = setInterval(() => {
       if (currentIndex < totalEmployees) {
-        setCompletedEmployees((prev) => [...prev, selectedEmployees[currentIndex].id]);
-        currentIndex++;
-        setProgress((currentIndex / totalEmployees) * 100);
+        const employee = selectedEmployees[currentIndex];
+        if (employee && employee.id) {
+          setCompletedEmployees((prev) => [...prev, employee.id]);
+          currentIndex++;
+          setProgress((currentIndex / totalEmployees) * 100);
+        } else {
+          clearInterval(interval);
+        }
       } else {
         clearInterval(interval);
 

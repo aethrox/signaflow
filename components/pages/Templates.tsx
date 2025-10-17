@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { Eye, Check, X } from 'lucide-react';
+import { Eye, Check } from 'lucide-react';
+import { EnhancedTemplatePreview } from '../EnhancedTemplatePreview';
+import { toast } from 'sonner';
 
 export function Templates() {
-  const [, setSelectedTemplate] = useState<number | null>(null);
+  const [activeTemplateId, setActiveTemplateId] = useState<number>(2);
   const [previewTemplate, setPreviewTemplate] = useState<number | null>(null);
 
   const templates = [
@@ -10,21 +12,23 @@ export function Templates() {
       id: 1,
       name: 'Minimal',
       description: 'Clean and simple design with essential information',
-      active: false,
     },
     {
       id: 2,
       name: 'Professional',
       description: 'Complete signature with logo, details, and social icons',
-      active: true,
     },
     {
       id: 3,
       name: 'Modern',
       description: 'Contemporary design with colorful accents',
-      active: false,
     },
   ];
+
+  const handleSetActive = (templateId: number) => {
+    setActiveTemplateId(templateId);
+    toast.success('Template activated successfully!');
+  };
 
   const renderTemplatePreview = (templateId: number) => {
     const previews: { [key: number]: JSX.Element } = {
@@ -84,11 +88,11 @@ export function Templates() {
           <div
             key={template.id}
             className={`bg-white rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 duration-300 ${
-              template.active ? 'ring-2 ring-[#10B981]' : 'border border-gray-100'
+              activeTemplateId === template.id ? 'ring-2 ring-[#10B981]' : 'border border-gray-100'
             }`}
           >
             <div className="relative bg-gray-50 p-6 min-h-[280px] flex items-center justify-center">
-              {template.active && (
+              {activeTemplateId === template.id && (
                 <div className="absolute top-4 right-4 bg-[#10B981] text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
                   <Check size={12} />
                   Active
@@ -111,9 +115,9 @@ export function Templates() {
                   <Eye size={16} />
                   Preview
                 </button>
-                {!template.active && (
+                {activeTemplateId !== template.id && (
                   <button
-                    onClick={() => setSelectedTemplate(template.id)}
+                    onClick={() => handleSetActive(template.id)}
                     className="flex-1 px-4 py-2 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all shadow-sm"
                   >
                     Set Active
@@ -126,42 +130,11 @@ export function Templates() {
       </div>
 
       {previewTemplate !== null && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-8 w-full max-w-3xl shadow-2xl relative">
-            <button
-              onClick={() => setPreviewTemplate(null)}
-              className="absolute top-4 right-4 text-[#6B7280] hover:text-[#1F2937]"
-            >
-              <X size={24} />
-            </button>
-
-            <h2 className="text-2xl font-bold text-[#1F2937] mb-6">Template Preview</h2>
-
-            <div className="py-12 px-8 bg-gray-50 rounded-lg flex items-center justify-center">
-              <div className="transform scale-125">
-                {renderTemplatePreview(previewTemplate)}
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={() => setPreviewTemplate(null)}
-                className="px-6 py-2.5 bg-white border border-[#E5E7EB] text-[#1F2937] rounded-lg font-semibold hover:bg-gray-50 transition-all"
-              >
-                Close
-              </button>
-              <button
-                onClick={() => {
-                  setSelectedTemplate(previewTemplate);
-                  setPreviewTemplate(null);
-                }}
-                className="px-6 py-2.5 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all shadow-sm"
-              >
-                Set as Active
-              </button>
-            </div>
-          </div>
-        </div>
+        <EnhancedTemplatePreview
+          templateId={previewTemplate}
+          onClose={() => setPreviewTemplate(null)}
+          onSetActive={handleSetActive}
+        />
       )}
     </div>
   );

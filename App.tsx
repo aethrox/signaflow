@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Toaster } from 'sonner';
 import { Sidebar } from './components/Sidebar';
 import { TopNavbar } from './components/TopNavbar';
 import { MobileNav } from './components/MobileNav';
@@ -46,6 +47,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
+      <Toaster position="top-right" richColors closeButton />
       <Sidebar
         currentPage={currentPage}
         onNavigate={(page) => {

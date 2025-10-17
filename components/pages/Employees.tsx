@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Search, Plus, Edit2, Trash2, X } from 'lucide-react';
+import { EmployeeDetailModal } from '../EmployeeDetailModal';
+import { toast } from 'sonner';
 
 interface Employee {
   id: number;
@@ -64,11 +66,43 @@ export function Employees() {
       phone: '+90 555 567 8901',
       status: 'active',
     },
+    {
+      id: 6,
+      firstName: 'Elif',
+      lastName: 'Yıldız',
+      email: 'elif.yildiz@company.com',
+      position: 'Product Manager',
+      department: 'Technology',
+      phone: '+90 555 678 9012',
+      status: 'active',
+    },
+    {
+      id: 7,
+      firstName: 'Burak',
+      lastName: 'Çelik',
+      email: 'burak.celik@company.com',
+      position: 'Sales Representative',
+      department: 'Sales',
+      phone: '+90 555 789 0123',
+      status: 'active',
+    },
+    {
+      id: 8,
+      firstName: 'Selin',
+      lastName: 'Arslan',
+      email: 'selin.arslan@company.com',
+      position: 'Content Specialist',
+      department: 'Marketing',
+      phone: '+90 555 890 1234',
+      status: 'active',
+    },
   ]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [detailEmployee, setDetailEmployee] = useState<Employee | null>(null);
+  const [currentTemplateId, setCurrentTemplateId] = useState(2);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -98,6 +132,7 @@ export function Employees() {
   };
 
   const handleEdit = (employee: Employee) => {
+    setDetailEmployee(null);
     setEditingEmployee(employee);
     setFormData({
       firstName: employee.firstName,
@@ -110,9 +145,15 @@ export function Employees() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: number) => {
+  const handleRowClick = (employee: Employee) => {
+    setDetailEmployee(employee);
+  };
+
+  const handleDelete = (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
     if (confirm('Are you sure you want to delete this employee?')) {
       setEmployees(employees.filter((emp) => emp.id !== id));
+      toast.success('Employee deleted successfully');
     }
   };
 
@@ -127,6 +168,7 @@ export function Employees() {
             : emp
         )
       );
+      toast.success('Employee updated successfully');
     } else {
       const newEmployee: Employee = {
         id: Math.max(...employees.map((e) => e.id)) + 1,
@@ -134,6 +176,7 @@ export function Employees() {
         status: 'active',
       };
       setEmployees([...employees, newEmployee]);
+      toast.success('Employee added successfully');
     }
 
     setIsModalOpen(false);
@@ -195,7 +238,11 @@ export function Employees() {
             </thead>
             <tbody>
               {filteredEmployees.map((employee) => (
-                <tr key={employee.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <tr
+                  key={employee.id}
+                  onClick={() => handleRowClick(employee)}
+                  className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
+                >
                   <td className="px-3 md:px-6 h-14 md:h-16">
                     <div className="flex items-center gap-2 md:gap-3">
                       <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#E0E7FF] flex items-center justify-center text-[#2563EB] font-semibold text-xs md:text-sm flex-shrink-0">
@@ -220,13 +267,13 @@ export function Employees() {
                   <td className="px-3 md:px-6 h-14 md:h-16">
                     <div className="flex items-center gap-1 md:gap-2">
                       <button
-                        onClick={() => handleEdit(employee)}
+                        onClick={(e) => { e.stopPropagation(); handleEdit(employee); }}
                         className="p-2 text-[#2563EB] hover:bg-blue-50 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                       >
                         <Edit2 size={16} />
                       </button>
                       <button
-                        onClick={() => handleDelete(employee.id)}
+                        onClick={(e) => handleDelete(employee.id, e)}
                         className="p-2 text-[#EF4444] hover:bg-red-50 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                       >
                         <Trash2 size={16} />
@@ -353,6 +400,19 @@ export function Employees() {
             </form>
           </div>
         </div>
+      )}
+
+      {detailEmployee && (
+        <EmployeeDetailModal
+          employee={detailEmployee}
+          onClose={() => setDetailEmployee(null)}
+          onEdit={(emp) => {
+            setDetailEmployee(null);
+            handleEdit(emp);
+          }}
+          currentTemplateId={currentTemplateId}
+          onTemplateChange={setCurrentTemplateId}
+        />
       )}
     </div>
   );

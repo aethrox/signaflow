@@ -22,7 +22,6 @@ export function AssignTemplateModal({
   onAssign,
 }: AssignTemplateModalProps) {
   const [selectedTemplate, setSelectedTemplate] = useState('professional');
-  const [generateImmediately, setGenerateImmediately] = useState(true);
   const [isAssigning, setIsAssigning] = useState(false);
 
   useEffect(() => {
@@ -35,7 +34,7 @@ export function AssignTemplateModal({
 
   const handleAssign = () => {
     setIsAssigning(true);
-    onAssign(selectedTemplate, generateImmediately);
+    onAssign(selectedTemplate, false);
   };
 
   return (
@@ -82,18 +81,6 @@ export function AssignTemplateModal({
                 ))}
               </ul>
             </div>
-          </div>
-
-          <div className="mb-6">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={generateImmediately}
-                onChange={(e) => setGenerateImmediately(e.target.checked)}
-                className="w-4 h-4 text-[#2563EB] border-gray-300 rounded focus:ring-[#2563EB]"
-              />
-              <span className="text-sm text-[#1F2937]">Generate signatures immediately</span>
-            </label>
           </div>
 
           <div className="flex gap-3">
@@ -171,6 +158,13 @@ export function GenerateSignaturesModal({
     }
   }, [isOpen, selectedEmployees, isGenerating, onClose]);
 
+  const handleClose = () => {
+    setProgress(0);
+    setCompletedEmployees([]);
+    setIsGenerating(false);
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   const isComplete = progress === 100;
@@ -181,9 +175,8 @@ export function GenerateSignaturesModal({
         <div className="sticky top-0 bg-white border-b border-gray-100 p-6 flex items-center justify-between rounded-t-2xl">
           <h2 className="text-xl font-bold text-[#1F2937]">Generate Signatures</h2>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="text-[#6B7280] hover:text-[#1F2937] transition-colors p-2 hover:bg-gray-100 rounded-lg"
-            disabled={isGenerating}
           >
             <X size={20} />
           </button>
@@ -250,7 +243,7 @@ export function GenerateSignaturesModal({
             {isComplete ? (
               <>
                 <button
-                  onClick={onClose}
+                  onClick={handleClose}
                   className="flex-1 px-4 py-2.5 bg-white border border-[#E5E7EB] text-[#1F2937] rounded-lg font-semibold hover:bg-gray-50 transition-all"
                 >
                   Close
@@ -264,9 +257,8 @@ export function GenerateSignaturesModal({
               </>
             ) : (
               <button
-                onClick={onClose}
-                disabled={isGenerating}
-                className="flex-1 px-4 py-2.5 bg-white border border-[#E5E7EB] text-[#1F2937] rounded-lg font-semibold hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleClose}
+                className="flex-1 px-4 py-2.5 bg-white border border-[#E5E7EB] text-[#1F2937] rounded-lg font-semibold hover:bg-gray-50 transition-all"
               >
                 Cancel
               </button>

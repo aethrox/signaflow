@@ -170,22 +170,12 @@ export function Employees() {
     }
   };
 
-  const handleAssignTemplate = (_templateId: string, generateImmediately: boolean) => {
-    if (generateImmediately) {
-      setTimeout(() => {
-        toast.success(`Template assigned to ${selectedEmployeeIds.length} employees`);
-        setShowAssignTemplateModal(false);
-        setTimeout(() => {
-          setShowGenerateModal(true);
-        }, 300);
-      }, 2000);
-    } else {
-      setTimeout(() => {
-        toast.success(`Template assigned to ${selectedEmployeeIds.length} employees`);
-        setShowAssignTemplateModal(false);
-        setSelectedEmployeeIds([]);
-      }, 2000);
-    }
+  const handleAssignTemplate = (_templateId: string, _generateImmediately: boolean) => {
+    setTimeout(() => {
+      toast.success(`Template assigned to ${selectedEmployeeIds.length} employees`);
+      setShowAssignTemplateModal(false);
+      setSelectedEmployeeIds([]);
+    }, 2000);
   };
 
   const handleBulkDelete = () => {

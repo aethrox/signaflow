@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Search, Plus, Edit2, Trash2, X, Filter } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, X, Filter, Palette, FileDown, Check } from 'lucide-react';
 import { EmployeeDetailModal } from '../EmployeeDetailModal';
+import { AssignTemplateModal, GenerateSignaturesModal } from '../BulkActionModals';
 import { toast } from 'sonner';
 
 interface Employee {
@@ -106,6 +107,9 @@ export function Employees() {
   const [departmentFilter, setDepartmentFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
   const [templateFilter, setTemplateFilter] = useState('All');
+  const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<number[]>([]);
+  const [showAssignTemplateModal, setShowAssignTemplateModal] = useState(false);
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -134,6 +138,42 @@ export function Employees() {
   };
 
   const hasActiveFilters = departmentFilter !== 'All' || statusFilter !== 'All' || templateFilter !== 'All' || searchTerm !== '';
+
+  const selectedEmployees = employees.filter((emp) => selectedEmployeeIds.includes(emp.id));
+  const allFilteredSelected = filteredEmployees.length > 0 && filteredEmployees.every((emp) => selectedEmployeeIds.includes(emp.id));
+
+  const handleSelectAll = () => {
+    if (allFilteredSelected) {
+      setSelectedEmployeeIds([]);
+    } else {
+      setSelectedEmployeeIds(filteredEmployees.map((emp) => emp.id));
+    }
+  };
+
+  const handleSelectEmployee = (id: number) => {
+    if (selectedEmployeeIds.includes(id)) {
+      setSelectedEmployeeIds(selectedEmployeeIds.filter((empId) => empId !== id));
+    } else {
+      setSelectedEmployeeIds([...selectedEmployeeIds, id]);
+    }
+  };
+
+  const handleAssignTemplate = (_templateId: string, generateImmediately: boolean) => {
+    toast.success(`Template assigned to ${selectedEmployeeIds.length} employees`);
+    if (generateImmediately) {
+      setShowGenerateModal(true);
+    } else {
+      setSelectedEmployeeIds([]);
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (confirm(`Are you sure you want to delete ${selectedEmployeeIds.length} employees?`)) {
+      setEmployees(employees.filter((emp) => !selectedEmployeeIds.includes(emp.id)));
+      toast.success(`${selectedEmployeeIds.length} employees deleted`);
+      setSelectedEmployeeIds([]);
+    }
+  };
 
   const handleAdd = () => {
     setEditingEmployee(null);
@@ -201,18 +241,56 @@ export function Employees() {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
-        <div>
-          <h1 className="text-[#1F2937] text-2xl md:text-3xl font-bold mb-2">Employees</h1>
-          <p className="text-[#6B7280] text-sm md:text-base">Manage your team members and their email signatures</p>
+      <div className="flex flex-col gap-4 mb-6 md:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-[#1F2937] text-2xl md:text-3xl font-bold mb-2">Employees</h1>
+            <p className="text-[#6B7280] text-sm md:text-base">Manage your team members and their email signatures</p>
+          </div>
+          <button
+            onClick={handleAdd}
+            className="px-4 md:px-6 py-2.5 md:py-3 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all shadow-sm flex items-center justify-center gap-2 min-h-[44px]"
+          >
+            <Plus size={20} />
+            <span>Add Employee</span>
+          </button>
         </div>
-        <button
-          onClick={handleAdd}
-          className="px-4 md:px-6 py-2.5 md:py-3 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all shadow-sm flex items-center justify-center gap-2 min-h-[44px]"
-        >
-          <Plus size={20} />
-          <span>Add Employee</span>
-        </button>
+
+        {selectedEmployeeIds.length > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Check size={16} className="text-[#2563EB]" />
+                <span className="text-sm font-semibold text-[#1F2937]">
+                  {selectedEmployeeIds.length} selected
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setShowAssignTemplateModal(true)}
+                  className="px-3 py-1.5 bg-white border border-[#E5E7EB] text-[#1F2937] rounded-lg font-medium hover:bg-gray-50 transition-all text-sm flex items-center gap-1.5"
+                >
+                  <Palette size={14} />
+                  Assign Template
+                </button>
+                <button
+                  onClick={() => setShowGenerateModal(true)}
+                  className="px-3 py-1.5 bg-white border border-[#E5E7EB] text-[#1F2937] rounded-lg font-medium hover:bg-gray-50 transition-all text-sm flex items-center gap-1.5"
+                >
+                  <FileDown size={14} />
+                  Generate Signatures
+                </button>
+                <button
+                  onClick={handleBulkDelete}
+                  className="px-3 py-1.5 bg-white border border-[#E5E7EB] text-[#EF4444] rounded-lg font-medium hover:bg-red-50 transition-all text-sm flex items-center gap-1.5"
+                >
+                  <Trash2 size={14} />
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="mb-4 md:mb-6 space-y-4">
@@ -289,6 +367,14 @@ export function Employees() {
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
+                <th className="px-3 md:px-6 h-10 md:h-12 text-left">
+                  <input
+                    type="checkbox"
+                    checked={allFilteredSelected}
+                    onChange={handleSelectAll}
+                    className="w-4 h-4 text-[#2563EB] border-gray-300 rounded focus:ring-[#2563EB] cursor-pointer"
+                  />
+                </th>
                 <th className="px-3 md:px-6 h-10 md:h-12 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
                   Employee
                 </th>
@@ -336,10 +422,23 @@ export function Employees() {
                 filteredEmployees.map((employee) => (
                 <tr
                   key={employee.id}
-                  onClick={() => handleRowClick(employee)}
-                  className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                 >
                   <td className="px-3 md:px-6 h-14 md:h-16">
+                    <input
+                      type="checkbox"
+                      checked={selectedEmployeeIds.includes(employee.id)}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        handleSelectEmployee(employee.id);
+                      }}
+                      className="w-4 h-4 text-[#2563EB] border-gray-300 rounded focus:ring-[#2563EB] cursor-pointer"
+                    />
+                  </td>
+                  <td
+                    className="px-3 md:px-6 h-14 md:h-16 cursor-pointer"
+                    onClick={() => handleRowClick(employee)}
+                  >
                     <div className="flex items-center gap-2 md:gap-3">
                       <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#E0E7FF] flex items-center justify-center text-[#2563EB] font-semibold text-xs md:text-sm flex-shrink-0">
                         {employee.firstName[0]}{employee.lastName[0]}
@@ -498,6 +597,26 @@ export function Employees() {
           </div>
         </div>
       )}
+
+      <AssignTemplateModal
+        isOpen={showAssignTemplateModal}
+        onClose={() => {
+          setShowAssignTemplateModal(false);
+          setSelectedEmployeeIds([]);
+        }}
+        selectedEmployees={selectedEmployees}
+        onAssign={handleAssignTemplate}
+      />
+
+      <GenerateSignaturesModal
+        isOpen={showGenerateModal}
+        onClose={() => {
+          setShowGenerateModal(false);
+          setSelectedEmployeeIds([]);
+        }}
+        selectedEmployees={selectedEmployees}
+        templateName="Professional"
+      />
 
       {detailEmployee && (
         <EmployeeDetailModal

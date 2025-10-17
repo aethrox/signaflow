@@ -1,15 +1,176 @@
 import { useState } from 'react';
+import { Calendar, Clock, Edit2, Trash2, Copy, Plus, Square } from 'lucide-react';
+import { format } from 'date-fns';
+import { toast } from 'sonner';
+
+interface Campaign {
+  id: number;
+  title: string;
+  message: string;
+  linkUrl: string;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+  status: 'active' | 'scheduled' | 'expired';
+}
 
 export function Campaigns() {
-  const [isActive, setIsActive] = useState(true);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([
+    {
+      id: 1,
+      title: 'Summer Sale',
+      message: 'Get 25% off all products this summer! Limited time offer.',
+      linkUrl: 'https://company.com/summer-sale',
+      startDate: '2025-10-20',
+      endDate: '2025-11-15',
+      isActive: true,
+      status: 'active',
+    },
+    {
+      id: 2,
+      title: 'Winter Campaign',
+      message: 'Holiday special - up to 50% off selected items!',
+      linkUrl: 'https://company.com/winter',
+      startDate: '2025-12-01',
+      endDate: '2025-12-31',
+      isActive: false,
+      status: 'scheduled',
+    },
+    {
+      id: 3,
+      title: 'Spring Promo',
+      message: 'Fresh deals for the new season!',
+      linkUrl: 'https://company.com/spring',
+      startDate: '2025-03-01',
+      endDate: '2025-03-31',
+      isActive: false,
+      status: 'expired',
+    },
+  ]);
+
+  const [editingCampaignId, setEditingCampaignId] = useState<number | null>(1);
   const [formData, setFormData] = useState({
-    title: 'Summer Sale',
-    message: 'Get 25% off all products this summer! Limited time offer.',
-    linkUrl: 'https://company.com/summer-sale',
+    title: campaigns[0].title,
+    message: campaigns[0].message,
+    linkUrl: campaigns[0].linkUrl,
+    startDate: campaigns[0].startDate,
+    endDate: campaigns[0].endDate,
   });
+
+  const editingCampaign = campaigns.find((c) => c.id === editingCampaignId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (editingCampaignId) {
+      setCampaigns(
+        campaigns.map((c) =>
+          c.id === editingCampaignId
+            ? { ...c, ...formData, status: getCampaignStatus(formData.startDate, formData.endDate) }
+            : c
+        )
+      );
+      toast.success('Campaign updated successfully!');
+    }
+  };
+
+  const getCampaignStatus = (startDate: string, endDate: string): 'active' | 'scheduled' | 'expired' => {
+    const now = new Date();
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (now >= start && now <= end) return 'active';
+    if (now < start) return 'scheduled';
+    return 'expired';
+  };
+
+  const getStatusBadge = (status: string) => {
+    const badges = {
+      active: {
+        icon: <div className="w-2 h-2 rounded-full bg-[#10B981]" />,
+        text: 'Active',
+        className: 'bg-[#ECFDF5] text-[#10B981]',
+      },
+      scheduled: {
+        icon: <Clock size={12} />,
+        text: 'Scheduled',
+        className: 'bg-[#FEF3C7] text-[#F59E0B]',
+      },
+      expired: {
+        icon: <Square size={12} />,
+        text: 'Expired',
+        className: 'bg-gray-100 text-gray-600',
+      },
+    };
+
+    const badge = badges[status as keyof typeof badges];
+    return (
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${badge.className}`}>
+        {badge.icon}
+        {badge.text}
+      </span>
+    );
+  };
+
+  const handleToggleActive = () => {
+    if (editingCampaignId) {
+      setCampaigns(
+        campaigns.map((c) =>
+          c.id === editingCampaignId ? { ...c, isActive: !c.isActive } : c
+        )
+      );
+      toast.success(editingCampaign?.isActive ? 'Campaign deactivated' : 'Campaign activated');
+    }
+  };
+
+  const handleEditCampaign = (campaign: Campaign) => {
+    setEditingCampaignId(campaign.id);
+    setFormData({
+      title: campaign.title,
+      message: campaign.message,
+      linkUrl: campaign.linkUrl,
+      startDate: campaign.startDate,
+      endDate: campaign.endDate,
+    });
+  };
+
+  const handleDeleteCampaign = (id: number) => {
+    if (confirm('Are you sure you want to delete this campaign?')) {
+      setCampaigns(campaigns.filter((c) => c.id !== id));
+      toast.success('Campaign deleted successfully');
+      if (editingCampaignId === id) {
+        const remaining = campaigns.filter((c) => c.id !== id);
+        if (remaining.length > 0) {
+          handleEditCampaign(remaining[0]);
+        }
+      }
+    }
+  };
+
+  const handleDuplicateCampaign = (campaign: Campaign) => {
+    const newCampaign: Campaign = {
+      ...campaign,
+      id: Math.max(...campaigns.map((c) => c.id)) + 1,
+      title: `${campaign.title} (Copy)`,
+      isActive: false,
+    };
+    setCampaigns([...campaigns, newCampaign]);
+    toast.success('Campaign duplicated successfully');
+  };
+
+  const handleCreateNew = () => {
+    const newCampaign: Campaign = {
+      id: Math.max(...campaigns.map((c) => c.id)) + 1,
+      title: 'New Campaign',
+      message: 'Enter your campaign message here',
+      linkUrl: 'https://company.com',
+      startDate: format(new Date(), 'yyyy-MM-dd'),
+      endDate: format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'),
+      isActive: false,
+      status: 'scheduled',
+    };
+    setCampaigns([...campaigns, newCampaign]);
+    handleEditCampaign(newCampaign);
+    toast.success('New campaign created');
   };
 
   return (
@@ -23,20 +184,25 @@ export function Campaigns() {
         <div>
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-[#1F2937]">Current Campaign</h2>
               <div className="flex items-center gap-3">
-                <span className={`text-sm font-medium ${isActive ? 'text-[#10B981]' : 'text-[#6B7280]'}`}>
-                  {isActive ? 'Active' : 'Inactive'}
+                <h2 className="text-lg font-bold text-[#1F2937]">
+                  {editingCampaign ? 'Edit Campaign' : 'Current Campaign'}
+                </h2>
+                {editingCampaign && getStatusBadge(editingCampaign.status)}
+              </div>
+              <div className="flex items-center gap-3">
+                <span className={`text-sm font-medium ${editingCampaign?.isActive ? 'text-[#10B981]' : 'text-[#6B7280]'}`}>
+                  {editingCampaign?.isActive ? 'Active' : 'Inactive'}
                 </span>
                 <button
-                  onClick={() => setIsActive(!isActive)}
+                  onClick={handleToggleActive}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    isActive ? 'bg-[#10B981]' : 'bg-gray-300'
+                    editingCampaign?.isActive ? 'bg-[#10B981]' : 'bg-gray-300'
                   }`}
                 >
                   <span
                     className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      isActive ? 'translate-x-6' : 'translate-x-1'
+                      editingCampaign?.isActive ? 'translate-x-6' : 'translate-x-1'
                     }`}
                   />
                 </button>
@@ -90,6 +256,41 @@ export function Campaigns() {
                 />
               </div>
 
+              <div>
+                <label className="block text-sm font-semibold text-[#1F2937] mb-3">
+                  Campaign Schedule
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs text-[#6B7280] mb-1.5">Start Date</label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" size={16} />
+                      <input
+                        type="date"
+                        required
+                        value={formData.startDate}
+                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                        className="h-10 pl-10 pr-3 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all text-sm"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-[#6B7280] mb-1.5">End Date</label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" size={16} />
+                      <input
+                        type="date"
+                        required
+                        value={formData.endDate}
+                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                        min={formData.startDate}
+                        className="h-10 pl-10 pr-3 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <button
                 type="submit"
                 className="w-full px-6 py-2.5 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all shadow-sm"
@@ -97,6 +298,89 @@ export function Campaigns() {
                 Update Campaign
               </button>
             </form>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-[#1F2937]">All Campaigns</h2>
+              <button
+                onClick={handleCreateNew}
+                className="px-3 py-1.5 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all text-sm flex items-center gap-1.5"
+              >
+                <Plus size={14} />
+                Create New
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {campaigns.map((campaign) => (
+                <div
+                  key={campaign.id}
+                  className={`border rounded-lg p-4 transition-all cursor-pointer ${
+                    editingCampaignId === campaign.id
+                      ? 'border-[#2563EB] bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                  }`}
+                  onClick={() => handleEditCampaign(campaign)}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-[#1F2937] text-sm truncate">
+                          {campaign.title}
+                        </h3>
+                        {getStatusBadge(campaign.status)}
+                      </div>
+                      <p className="text-xs text-[#6B7280] line-clamp-1">{campaign.message}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs text-[#6B7280] mb-3">
+                    <Calendar size={12} />
+                    <span>
+                      {format(new Date(campaign.startDate), 'MMM dd, yyyy')} -{' '}
+                      {format(new Date(campaign.endDate), 'MMM dd, yyyy')}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditCampaign(campaign);
+                      }}
+                      className="flex-1 px-2 py-1.5 bg-white border border-[#E5E7EB] text-[#1F2937] rounded text-xs font-medium hover:bg-gray-50 transition-all flex items-center justify-center gap-1"
+                    >
+                      <Edit2 size={12} />
+                      Edit
+                    </button>
+
+                    {campaign.status === 'expired' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDuplicateCampaign(campaign);
+                        }}
+                        className="flex-1 px-2 py-1.5 bg-white border border-[#E5E7EB] text-[#1F2937] rounded text-xs font-medium hover:bg-gray-50 transition-all flex items-center justify-center gap-1"
+                      >
+                        <Copy size={12} />
+                        Duplicate
+                      </button>
+                    )}
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteCampaign(campaign.id);
+                      }}
+                      className="px-2 py-1.5 bg-white border border-[#E5E7EB] text-[#EF4444] rounded text-xs font-medium hover:bg-red-50 transition-all flex items-center justify-center gap-1"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -111,7 +395,7 @@ export function Campaigns() {
         </div>
 
         <div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sticky top-8">
             <h2 className="text-lg font-bold text-[#1F2937] mb-4">Live Preview</h2>
             <p className="text-sm text-[#6B7280] mb-6">
               This is how the banner will appear in email signatures
@@ -128,7 +412,7 @@ export function Campaigns() {
                   </div>
                 </div>
 
-                {isActive && (
+                {editingCampaign?.isActive && (
                   <a
                     href={formData.linkUrl}
                     target="_blank"
@@ -161,7 +445,7 @@ export function Campaigns() {
               </div>
             </div>
 
-            {!isActive && (
+            {!editingCampaign?.isActive && (
               <div className="mt-4 text-center">
                 <p className="text-sm text-[#6B7280]">
                   Campaign is currently inactive. Toggle the switch above to activate it.

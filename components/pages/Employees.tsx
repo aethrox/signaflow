@@ -13,6 +13,7 @@ interface Employee {
   department: string;
   phone: string;
   status: 'active' | 'inactive';
+  currentTemplate: 'minimal' | 'professional' | 'modern';
 }
 
 export function Employees() {
@@ -26,6 +27,7 @@ export function Employees() {
       department: 'Executive',
       phone: '+90 555 123 4567',
       status: 'active',
+      currentTemplate: 'professional',
     },
     {
       id: 2,
@@ -36,6 +38,7 @@ export function Employees() {
       department: 'Technology',
       phone: '+90 555 234 5678',
       status: 'active',
+      currentTemplate: 'modern',
     },
     {
       id: 3,
@@ -46,6 +49,7 @@ export function Employees() {
       department: 'Sales',
       phone: '+90 555 345 6789',
       status: 'active',
+      currentTemplate: 'professional',
     },
     {
       id: 4,
@@ -56,6 +60,7 @@ export function Employees() {
       department: 'Marketing',
       phone: '+90 555 456 7890',
       status: 'active',
+      currentTemplate: 'modern',
     },
     {
       id: 5,
@@ -66,6 +71,7 @@ export function Employees() {
       department: 'Design',
       phone: '+90 555 567 8901',
       status: 'active',
+      currentTemplate: 'minimal',
     },
     {
       id: 6,
@@ -76,6 +82,7 @@ export function Employees() {
       department: 'Technology',
       phone: '+90 555 678 9012',
       status: 'active',
+      currentTemplate: 'modern',
     },
     {
       id: 7,
@@ -86,6 +93,7 @@ export function Employees() {
       department: 'Sales',
       phone: '+90 555 789 0123',
       status: 'active',
+      currentTemplate: 'professional',
     },
     {
       id: 8,
@@ -96,6 +104,7 @@ export function Employees() {
       department: 'Marketing',
       phone: '+90 555 890 1234',
       status: 'active',
+      currentTemplate: 'minimal',
     },
   ]);
 
@@ -117,6 +126,7 @@ export function Employees() {
     position: '',
     department: '',
     phone: '',
+    currentTemplate: 'professional' as 'minimal' | 'professional' | 'modern',
   });
 
   const filteredEmployees = employees.filter((emp) => {
@@ -125,7 +135,7 @@ export function Employees() {
       .includes(searchTerm.toLowerCase());
     const matchesDepartment = departmentFilter === 'All' || emp.department === departmentFilter;
     const matchesStatus = statusFilter === 'All' || emp.status === statusFilter.toLowerCase();
-    const matchesTemplate = templateFilter === 'All';
+    const matchesTemplate = templateFilter === 'All' || emp.currentTemplate === templateFilter.toLowerCase();
 
     return matchesSearch && matchesDepartment && matchesStatus && matchesTemplate;
   });
@@ -184,6 +194,7 @@ export function Employees() {
       position: '',
       department: '',
       phone: '',
+      currentTemplate: 'professional',
     });
     setIsModalOpen(true);
   };
@@ -198,6 +209,7 @@ export function Employees() {
       position: employee.position,
       department: employee.department,
       phone: employee.phone,
+      currentTemplate: employee.currentTemplate,
     });
     setIsModalOpen(true);
   };
@@ -231,6 +243,7 @@ export function Employees() {
         id: Math.max(...employees.map((e) => e.id)) + 1,
         ...formData,
         status: 'active',
+        currentTemplate: formData.currentTemplate,
       };
       setEmployees([...employees, newEmployee]);
       toast.success('Employee added successfully');
@@ -329,9 +342,9 @@ export function Employees() {
               className="h-10 px-3 border border-[#E5E7EB] rounded-lg focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all text-sm"
             >
               <option value="All">All Templates</option>
-              <option value="Minimal">Minimal</option>
-              <option value="Professional">Professional</option>
-              <option value="Modern">Modern</option>
+              <option value="minimal">Minimal</option>
+              <option value="professional">Professional</option>
+              <option value="modern">Modern</option>
             </select>
 
             {hasActiveFilters && (

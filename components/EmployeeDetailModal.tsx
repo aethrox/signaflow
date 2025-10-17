@@ -11,6 +11,7 @@ interface Employee {
   department: string;
   phone: string;
   status: 'active' | 'inactive';
+  currentTemplate: 'minimal' | 'professional' | 'modern';
 }
 
 interface EmployeeDetailModalProps {

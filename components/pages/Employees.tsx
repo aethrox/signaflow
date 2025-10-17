@@ -593,8 +593,11 @@ export function Employees() {
                   required
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  pattern="[\+]?[0-9\s\-\(\)]+"
+                  placeholder="+90 555 123 4567"
                   className="h-10 px-3 border border-[#E5E7EB] rounded-lg w-full focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all"
                 />
+                <p className="text-xs text-[#6B7280] mt-1">Format: +90 555 123 4567</p>
               </div>
 
               <div className="flex gap-3 justify-end">

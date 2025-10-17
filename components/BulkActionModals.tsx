@@ -155,11 +155,7 @@ export function GenerateSignaturesModal({
         }
       } else {
         clearInterval(interval);
-
-        setTimeout(() => {
-          toast.success(`Signatures generated for ${totalEmployees} employee${totalEmployees > 1 ? 's' : ''}`);
-          onClose();
-        }, 1000);
+        toast.success(`Signatures generated for ${totalEmployees} employee${totalEmployees > 1 ? 's' : ''}`);
       }
     }, (2000 / totalEmployees));
 

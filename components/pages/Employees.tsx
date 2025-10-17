@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Search, Plus, Edit2, Trash2, X, Filter, Palette, FileDown, Check } from 'lucide-react';
 import { EmployeeDetailModal } from '../EmployeeDetailModal';
 import { AssignTemplateModal, GenerateSignaturesModal } from '../BulkActionModals';
+import { ConfirmDialog } from '../ConfirmDialog';
 import { toast } from 'sonner';
 
 interface Employee {
@@ -119,6 +120,7 @@ export function Employees() {
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<number[]>([]);
   const [showAssignTemplateModal, setShowAssignTemplateModal] = useState(false);
   const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; employeeId: number | null; isBulk: boolean }>({ show: false, employeeId: null, isBulk: false });
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -178,11 +180,19 @@ export function Employees() {
   };
 
   const handleBulkDelete = () => {
-    if (confirm(`Are you sure you want to delete ${selectedEmployeeIds.length} employees?`)) {
+    setDeleteConfirm({ show: true, employeeId: null, isBulk: true });
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteConfirm.isBulk) {
       setEmployees(employees.filter((emp) => !selectedEmployeeIds.includes(emp.id)));
       toast.success(`${selectedEmployeeIds.length} employees deleted`);
       setSelectedEmployeeIds([]);
+    } else if (deleteConfirm.employeeId) {
+      setEmployees(employees.filter((emp) => emp.id !== deleteConfirm.employeeId));
+      toast.success('Employee deleted successfully');
     }
+    setDeleteConfirm({ show: false, employeeId: null, isBulk: false });
   };
 
   const handleAdd = () => {
@@ -220,10 +230,7 @@ export function Employees() {
 
   const handleDelete = (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm('Are you sure you want to delete this employee?')) {
-      setEmployees(employees.filter((emp) => emp.id !== id));
-      toast.success('Employee deleted successfully');
-    }
+    setDeleteConfirm({ show: true, employeeId: id, isBulk: false });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -643,6 +650,21 @@ export function Employees() {
           onTemplateChange={setCurrentTemplateId}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={deleteConfirm.show}
+        onClose={() => setDeleteConfirm({ show: false, employeeId: null, isBulk: false })}
+        onConfirm={handleConfirmDelete}
+        title={deleteConfirm.isBulk ? 'Delete Multiple Employees' : 'Delete Employee'}
+        message={
+          deleteConfirm.isBulk
+            ? `Are you sure you want to delete ${selectedEmployeeIds.length} employees? This action cannot be undone.`
+            : 'Are you sure you want to delete this employee? This action cannot be undone.'
+        }
+        confirmText="Delete"
+        cancelText="Cancel"
+        danger
+      />
     </div>
   );
 }

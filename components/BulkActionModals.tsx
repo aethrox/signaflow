@@ -1,5 +1,6 @@
 import { X, CheckCircle, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 
 interface Employee {
   id: number;
@@ -142,12 +143,17 @@ export function GenerateSignaturesModal({
         } else {
           setIsGenerating(false);
           clearInterval(interval);
+
+          setTimeout(() => {
+            toast.success(`${totalEmployees} signature${totalEmployees > 1 ? 's' : ''} generated successfully!`);
+            onClose();
+          }, 2000);
         }
       }, 800);
 
       return () => clearInterval(interval);
     }
-  }, [isOpen, selectedEmployees, isGenerating]);
+  }, [isOpen, selectedEmployees, isGenerating, onClose]);
 
   if (!isOpen) return null;
 

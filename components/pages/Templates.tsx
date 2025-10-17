@@ -1,12 +1,22 @@
 import { useState } from 'react';
-import { Eye, Check, Filter } from 'lucide-react';
+import { Eye, Check, Filter, Users } from 'lucide-react';
 import { EnhancedTemplatePreview } from '../EnhancedTemplatePreview';
+import { ApplyToDepartmentModal } from '../ApplyToDepartmentModal';
 import { toast } from 'sonner';
 
 export function Templates() {
   const [activeTemplateId, setActiveTemplateId] = useState<number>(2);
   const [previewTemplate, setPreviewTemplate] = useState<number | null>(null);
   const [departmentFilter, setDepartmentFilter] = useState('All');
+  const [applyToDeptModal, setApplyToDeptModal] = useState<{ show: boolean; templateId: number | null; templateName: string }>({ show: false, templateId: null, templateName: '' });
+
+  const departmentCounts = {
+    Executive: 1,
+    Technology: 3,
+    Sales: 2,
+    Marketing: 2,
+    Design: 1,
+  };
 
   const templateUsage = {
     1: { count: 1, departments: ['Design'] },
@@ -43,6 +53,15 @@ export function Templates() {
   const handleSetActive = (templateId: number) => {
     setActiveTemplateId(templateId);
     toast.success('Template activated successfully!');
+  };
+
+  const handleApplyToDepartment = (templateId: number, templateName: string) => {
+    setApplyToDeptModal({ show: true, templateId, templateName });
+  };
+
+  const handleConfirmApply = (department: string) => {
+    const count = departmentCounts[department as keyof typeof departmentCounts] || 0;
+    toast.success(`Template applied to ${count} employees in ${department}`);
   };
 
   const renderTemplatePreview = (templateId: number) => {
@@ -155,22 +174,31 @@ export function Templates() {
                 </div>
               </div>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setPreviewTemplate(template.id)}
-                  className="flex-1 px-4 py-2 bg-white border border-[#E5E7EB] text-[#1F2937] rounded-lg font-semibold hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
-                >
-                  <Eye size={16} />
-                  Preview
-                </button>
-                {activeTemplateId !== template.id && (
+              <div className="space-y-2">
+                <div className="flex gap-2">
                   <button
-                    onClick={() => handleSetActive(template.id)}
-                    className="flex-1 px-4 py-2 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all shadow-sm"
+                    onClick={() => setPreviewTemplate(template.id)}
+                    className="flex-1 px-4 py-2 bg-white border border-[#E5E7EB] text-[#1F2937] rounded-lg font-semibold hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
                   >
-                    Set Active
+                    <Eye size={16} />
+                    Preview
                   </button>
-                )}
+                  {activeTemplateId !== template.id && (
+                    <button
+                      onClick={() => handleSetActive(template.id)}
+                      className="flex-1 px-4 py-2 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all shadow-sm"
+                    >
+                      Set Active
+                    </button>
+                  )}
+                </div>
+                <button
+                  onClick={() => handleApplyToDepartment(template.id, template.name)}
+                  className="w-full px-4 py-2 bg-white border border-[#E5E7EB] text-[#2563EB] rounded-lg font-semibold hover:bg-blue-50 transition-all flex items-center justify-center gap-2"
+                >
+                  <Users size={16} />
+                  Apply to Department
+                </button>
               </div>
             </div>
           </div>
@@ -184,6 +212,14 @@ export function Templates() {
           onSetActive={handleSetActive}
         />
       )}
+
+      <ApplyToDepartmentModal
+        isOpen={applyToDeptModal.show}
+        onClose={() => setApplyToDeptModal({ show: false, templateId: null, templateName: '' })}
+        onApply={handleConfirmApply}
+        templateName={applyToDeptModal.templateName}
+        departmentCounts={departmentCounts}
+      />
     </div>
   );
 }

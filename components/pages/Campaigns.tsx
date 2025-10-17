@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Calendar, Clock, Edit2, Trash2, Copy, Plus, Square } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '../ConfirmDialog';
 
 interface Campaign {
   id: number;
@@ -56,20 +57,30 @@ export function Campaigns() {
     startDate: campaigns[0].startDate,
     endDate: campaigns[0].endDate,
   });
+  const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; campaignId: number | null }>({ show: false, campaignId: null });
 
   const editingCampaign = campaigns.find((c) => c.id === editingCampaignId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingCampaignId) {
+      const newStatus = getCampaignStatus(formData.startDate, formData.endDate);
+
       setCampaigns(
         campaigns.map((c) =>
           c.id === editingCampaignId
-            ? { ...c, ...formData, status: getCampaignStatus(formData.startDate, formData.endDate) }
+            ? { ...c, ...formData, status: newStatus }
             : c
         )
       );
-      toast.success('Campaign updated successfully!');
+
+      if (newStatus === 'expired') {
+        toast.warning('Campaign dates are in the past', {
+          description: 'This campaign will be marked as expired',
+        });
+      } else {
+        toast.success('Campaign updated successfully!');
+      }
     }
   };
 
@@ -134,16 +145,21 @@ export function Campaigns() {
   };
 
   const handleDeleteCampaign = (id: number) => {
-    if (confirm('Are you sure you want to delete this campaign?')) {
-      setCampaigns(campaigns.filter((c) => c.id !== id));
+    setDeleteConfirm({ show: true, campaignId: id });
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteConfirm.campaignId) {
+      setCampaigns(campaigns.filter((c) => c.id !== deleteConfirm.campaignId));
       toast.success('Campaign deleted successfully');
-      if (editingCampaignId === id) {
-        const remaining = campaigns.filter((c) => c.id !== id);
+      if (editingCampaignId === deleteConfirm.campaignId) {
+        const remaining = campaigns.filter((c) => c.id !== deleteConfirm.campaignId);
         if (remaining.length > 0) {
           handleEditCampaign(remaining[0]);
         }
       }
     }
+    setDeleteConfirm({ show: false, campaignId: null });
   };
 
   const handleDuplicateCampaign = (campaign: Campaign) => {
@@ -455,6 +471,17 @@ export function Campaigns() {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={deleteConfirm.show}
+        onClose={() => setDeleteConfirm({ show: false, campaignId: null })}
+        onConfirm={handleConfirmDelete}
+        title="Delete Campaign"
+        message="Are you sure you want to delete this campaign? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        danger
+      />
     </div>
   );
 }

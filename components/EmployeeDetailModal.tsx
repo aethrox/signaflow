@@ -1,6 +1,8 @@
-import { X, Copy, FileText, Edit2 } from 'lucide-react';
+import { X, Copy, FileText, Edit2, Loader2 } from 'lucide-react';
 import { signatureTemplates, getSignaturePlainText, getTemplateNameById, SignatureData } from '../utils/signatureTemplates';
 import { toast } from 'sonner';
+import { generateSignature } from '../src/services/signatureApi';
+import { useState } from 'react';
 
 interface Employee {
   id: number;
@@ -29,6 +31,9 @@ export function EmployeeDetailModal({
   currentTemplateId = 2,
   onTemplateChange
 }: EmployeeDetailModalProps) {
+  const [generatedSignature, setGeneratedSignature] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
   const signatureData: SignatureData = {
     firstName: employee.firstName,
     lastName: employee.lastName,
@@ -42,9 +47,46 @@ export function EmployeeDetailModal({
   const signatureHTML = signatureTemplates[templateName](signatureData);
   const signaturePlainText = getSignaturePlainText(signatureData);
 
+  const handleGenerateSignature = async () => {
+    setIsGenerating(true);
+    try {
+      const result = await generateSignature({
+        employee: {
+          firstName: employee.firstName,
+          lastName: employee.lastName,
+          email: employee.email,
+          position: employee.position,
+          department: employee.department,
+          phone: employee.phone
+        },
+        template: {
+          id: templateName,
+          name: templateName.charAt(0).toUpperCase() + templateName.slice(1)
+        },
+        company: {
+          name: 'Company Ltd.',
+          domain: 'company.com',
+          brandColor: '#2B4C8C'
+        }
+      });
+      
+      setGeneratedSignature(result.signatureHtml);
+      toast.success('Signature generated successfully!');
+    } catch (error) {
+      toast.error('Failed to generate signature');
+      console.error('Generation error:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const handleCopyHTML = async () => {
     try {
-      await navigator.clipboard.writeText(signatureHTML);
+      if (!generatedSignature) {
+        await handleGenerateSignature();
+      }
+      const htmlToCopy = generatedSignature || signatureHTML;
+      await navigator.clipboard.writeText(htmlToCopy);
       toast.success('Signature HTML copied to clipboard!');
     } catch (err) {
       toast.error('Failed to copy HTML');
@@ -113,17 +155,27 @@ export function EmployeeDetailModal({
           <div className="mb-6">
             <h4 className="text-sm font-semibold text-[#1F2937] mb-3">Signature Preview</h4>
             <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-              <div dangerouslySetInnerHTML={{ __html: signatureHTML }} />
+              <div dangerouslySetInnerHTML={{ __html: generatedSignature || signatureHTML }} />
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={handleCopyHTML}
-              className="flex-1 px-4 py-2.5 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all shadow-sm flex items-center justify-center gap-2"
+              disabled={isGenerating}
+              className="flex-1 px-4 py-2.5 bg-[#2563EB] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Copy size={16} />
-              Copy HTML
+              {isGenerating ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Copy size={16} />
+                  Copy HTML
+                </>
+              )}
             </button>
             <button
               onClick={handleCopyPlainText}

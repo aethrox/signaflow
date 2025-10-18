@@ -1,6 +1,7 @@
 import { X, CheckCircle, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { generateSignature } from '../src/services/signatureApi';
 
 interface Employee {
   id: number;
@@ -135,32 +136,51 @@ export function GenerateSignaturesModal({
       return;
     }
 
-    setProgress(0);
-    setCompletedEmployees([]);
+    const generateAllSignatures = async () => {
+      setProgress(0);
+      setCompletedEmployees([]);
 
-    const totalEmployees = selectedEmployees.length;
-    if (totalEmployees === 0) return;
+      const totalEmployees = selectedEmployees.length;
+      if (totalEmployees === 0) return;
 
-    let currentIndex = 0;
+      for (let i = 0; i < selectedEmployees.length; i++) {
+        const employee = selectedEmployees[i];
 
-    const interval = setInterval(() => {
-      if (currentIndex < totalEmployees) {
-        const employee = selectedEmployees[currentIndex];
-        if (employee && employee.id) {
+        try {
+          await generateSignature({
+            employee: {
+              firstName: employee.firstName,
+              lastName: employee.lastName,
+              email: `${employee.firstName.toLowerCase()}.${employee.lastName.toLowerCase()}@company.com`,
+              position: 'Employee',
+              department: 'General'
+            },
+            template: {
+              id: templateName.toLowerCase(),
+              name: templateName
+            },
+            company: {
+              name: 'Company Ltd.',
+              domain: 'company.com',
+              brandColor: '#2B4C8C'
+            }
+          });
+
           setCompletedEmployees((prev) => [...prev, employee.id]);
-          currentIndex++;
-          setProgress((currentIndex / totalEmployees) * 100);
-        } else {
-          clearInterval(interval);
+          setProgress(((i + 1) / totalEmployees) * 100);
+        } catch (error) {
+          console.error(`Failed to generate signature for ${employee.firstName} ${employee.lastName}:`, error);
         }
-      } else {
-        clearInterval(interval);
-        toast.success(`Signatures generated for ${totalEmployees} employee${totalEmployees > 1 ? 's' : ''}`);
-      }
-    }, (2000 / totalEmployees));
 
-    return () => clearInterval(interval);
-  }, [isOpen, selectedEmployees, onClose]);
+        // Add a small delay between requests to avoid overwhelming the server
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+
+      toast.success(`Generated ${totalEmployees} signature${totalEmployees > 1 ? 's' : ''} successfully!`);
+    };
+
+    generateAllSignatures();
+  }, [isOpen, selectedEmployees, templateName]);
 
   const handleClose = () => {
     onClose();

@@ -48,7 +48,7 @@ export function Settings() {
     logoUrl: null,
     logoFileName: null,
     brandColor: '#2B4C8C',
-    n8nWebhookUrl: 'https://sldzx1zf.rcld.app/webhook/generate-signature',
+    n8nWebhookUrl: 'https://test.app/webhook/generate-signature',
     socialMedia: {
       linkedin: 'linkedin.com/company/example',
       twitter: 'twitter.com/company',
@@ -311,7 +311,7 @@ export function Settings() {
                       setCompanySettings({ ...companySettings, n8nWebhookUrl: e.target.value })
                     }
                     className="w-full h-10 px-3 border border-[#E5E7EB] rounded-lg focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] outline-none transition-all"
-                    placeholder="https://your-n8n.com/webhook/generate-signature"
+                    placeholder="https://test.app/webhook/generate-signature"
                   />
                   <p className="text-sm text-[#6B7280] mt-1">
                     Your N8N workflow webhook URL for signature generation

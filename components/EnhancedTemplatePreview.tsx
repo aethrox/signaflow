@@ -1,7 +1,8 @@
-import { X, Check, Users } from 'lucide-react';
-import { useState } from 'react';
+import { X, Check, Users, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { signatureTemplates, getTemplateNameById, SignatureData } from '../utils/signatureTemplates';
 import { toast } from 'sonner';
+import { generateSignature } from '../src/services/signatureApi';
 
 interface EnhancedTemplatePreviewProps {
   templateId: number;
@@ -44,10 +45,48 @@ export function EnhancedTemplatePreview({
   onApplyToDepartment,
 }: EnhancedTemplatePreviewProps) {
   const [selectedEmployeeIndex, setSelectedEmployeeIndex] = useState(0);
+  const [previewHtml, setPreviewHtml] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
+  
   const selectedEmployee = mockEmployees[selectedEmployeeIndex];
-
   const templateName = getTemplateNameById(templateId);
   const signatureHTML = signatureTemplates[templateName](selectedEmployee);
+
+  useEffect(() => {
+    const generatePreview = async () => {
+      setIsLoading(true);
+      try {
+        const result = await generateSignature({
+          employee: {
+            firstName: selectedEmployee.firstName,
+            lastName: selectedEmployee.lastName,
+            email: selectedEmployee.email,
+            position: selectedEmployee.position,
+            department: selectedEmployee.department,
+            phone: selectedEmployee.phone
+          },
+          template: {
+            id: templateName,
+            name: templateName.charAt(0).toUpperCase() + templateName.slice(1)
+          },
+          company: {
+            name: 'Company Ltd.',
+            domain: 'company.com',
+            brandColor: '#2B4C8C'
+          }
+        });
+        
+        setPreviewHtml(result.signatureHtml);
+      } catch (error) {
+        console.error('Preview generation failed:', error);
+        setPreviewHtml(signatureHTML); // Fallback to local template
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    generatePreview();
+  }, [selectedEmployeeIndex, templateId, templateName, selectedEmployee, signatureHTML]);
 
   const handleSetActive = () => {
     onSetActive(templateId);
@@ -96,9 +135,16 @@ export function EnhancedTemplatePreview({
           </div>
 
           <div className="bg-gray-50 rounded-lg p-8 border border-gray-200 mb-6 flex items-center justify-center min-h-[300px]">
-            <div className="transform scale-110">
-              <div dangerouslySetInnerHTML={{ __html: signatureHTML }} />
-            </div>
+            {isLoading ? (
+              <div className="flex items-center gap-2 text-[#6B7280]">
+                <Loader2 className="h-6 w-6 animate-spin" />
+                <span>Generating preview...</span>
+              </div>
+            ) : (
+              <div className="transform scale-110">
+                <div dangerouslySetInnerHTML={{ __html: previewHtml || signatureHTML }} />
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">

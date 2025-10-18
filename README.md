@@ -1,5 +1,11 @@
 # SignaFlow - Email Signature Management Platform
 
+<p align="center">
+  <a href="https://github.com/aethrox/signaflow/docs/signaflow_intro.md">
+    <img src="signaflow_logo.png" alt="Proje Logosu" width="350">
+  </a>
+</p>
+
 > **⚠️ PROJECT STATUS: DISCONTINUED (Oct 18, 2025)**
 > 
 > **Why Stopped:** Gmail's HTML rendering restrictions prevent automated signature installation - the core value proposition. Even $50/month competitors (WiseStamp, Exclaimer) face this limitation and use browser extensions instead.

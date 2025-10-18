@@ -1,4 +1,4 @@
-const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || 'https://sldzx1zf.rcld.app/webhook/generate-signature';
+const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || 'https://test.app/webhook/generate-signature';
 
 interface GenerateSignatureRequest {
   employee: {
